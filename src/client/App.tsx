@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "@/dashboard/Dashboard";
 import Wrapper from "./wrapper";
 import Inventory from "./inventory/Inventory";
+import Products from "./products/Products";
 
 function App() {
   const [queryClient] = useState(
@@ -90,6 +91,18 @@ function App() {
               <trpc.Provider client={trpcClient} queryClient={queryClient}>
                 <QueryClientProvider client={queryClient}>
                   <Inventory />
+                </QueryClientProvider>
+              </trpc.Provider>
+            </Wrapper>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <Wrapper>
+              <trpc.Provider client={trpcClient} queryClient={queryClient}>
+                <QueryClientProvider client={queryClient}>
+                  <Products />
                 </QueryClientProvider>
               </trpc.Provider>
             </Wrapper>

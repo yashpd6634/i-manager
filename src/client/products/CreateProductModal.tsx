@@ -3,6 +3,7 @@ import { v4 } from "uuid";
 import Header from "@/components/header";
 
 type ProductFormData = {
+  productId: string;
   name: string;
   price: number;
   stockQuantity: number;

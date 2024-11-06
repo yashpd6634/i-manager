@@ -5,6 +5,7 @@ import { trpc } from "@/util";
 import Header from "@/components/header";
 
 type ProductFormData = {
+  productId: string;
   name: string;
   price: number;
   stockQuantity: number;
@@ -16,9 +17,15 @@ const Products = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data, isLoading, isError } = trpc.getProducts.useQuery(searchTerm);
+  const mutation = trpc.createProducts.useMutation({
+    onSuccess: () => {
+      // Reload the page after successfully creating a product
+      window.location.reload();
+    },
+  });
 
   const handleCreateProduct = (productData: ProductFormData) => {
-    trpc.createProducts.useMutation().mutate(productData);
+    mutation.mutate(productData);
   };
 
   if (isLoading) {
@@ -71,7 +78,13 @@ const Products = () => {
               className="border shadow rounded-md p-4 max-w-full w-full mx-auto"
             >
               <div className="flex flex-col items-center">
-                <img />
+                <img
+                  src="../assets/black-suit.jpg"
+                  alt={product.name}
+                  width={150}
+                  height={150}
+                  className="mb-3 rounded-2xl w-36 h-36"
+                />
                 <h3 className="text-lg text-gray-900 font-semibold">
                   {product.name}
                 </h3>
