@@ -10,6 +10,8 @@ import Wrapper from "./wrapper";
 import Inventory from "./inventory/Inventory";
 import Products from "./products/Products";
 import Merchants from "./merchants/Merchants";
+import Settings from "./settings/Settings";
+import Expenses from "./expenses/Expenses";
 
 function App() {
   const [queryClient] = useState(
@@ -121,7 +123,30 @@ function App() {
             </Wrapper>
           }
         />
-        {/* <Route path="/contact" element={<Contact />} /> */}
+        <Route
+          path="/settings"
+          element={
+            <Wrapper>
+              <trpc.Provider client={trpcClient} queryClient={queryClient}>
+                <QueryClientProvider client={queryClient}>
+                  <Settings />
+                </QueryClientProvider>
+              </trpc.Provider>
+            </Wrapper>
+          }
+        />
+        <Route
+          path="/expenses"
+          element={
+            <Wrapper>
+              <trpc.Provider client={trpcClient} queryClient={queryClient}>
+                <QueryClientProvider client={queryClient}>
+                  <Expenses />
+                </QueryClientProvider>
+              </trpc.Provider>
+            </Wrapper>
+          }
+        />
       </Routes>
     </Router>
   );

@@ -127,6 +127,26 @@ export const appRouter = t.router({
       console.log("Error retrieving merchants", error);
     }
   }),
+  getExpensesByCategory: t.procedure.query(async () => {
+    try {
+      const expenseByCategorySummaryRaw =
+        await prisma.expenseByCategory.findMany({
+          orderBy: {
+            date: "desc",
+          },
+        });
+      const expenseByCategorySummary = expenseByCategorySummaryRaw.map(
+        (item) => ({
+          ...item,
+          amount: item.amount.toString(),
+        })
+      );
+
+      return { expenseByCategorySummary };
+    } catch (error) {
+      console.log("Error retrieving expenses by category", error);
+    }
+  }),
 });
 
 export type AppRouter = typeof appRouter;
