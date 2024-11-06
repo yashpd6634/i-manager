@@ -114,10 +114,19 @@ export const appRouter = t.router({
 
           return products;
         } catch (error) {
-          console.log("", error);
+          console.log("Error creating products", error);
         }
       }
     ),
+  getMerchants: t.procedure.query(async () => {
+    try {
+      const merchants = await prisma.users.findMany();
+
+      return { merchants };
+    } catch (error) {
+      console.log("Error retrieving merchants", error);
+    }
+  }),
 });
 
 export type AppRouter = typeof appRouter;

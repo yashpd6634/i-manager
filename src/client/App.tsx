@@ -9,6 +9,7 @@ import Dashboard from "@/dashboard/Dashboard";
 import Wrapper from "./wrapper";
 import Inventory from "./inventory/Inventory";
 import Products from "./products/Products";
+import Merchants from "./merchants/Merchants";
 
 function App() {
   const [queryClient] = useState(
@@ -103,6 +104,18 @@ function App() {
               <trpc.Provider client={trpcClient} queryClient={queryClient}>
                 <QueryClientProvider client={queryClient}>
                   <Products />
+                </QueryClientProvider>
+              </trpc.Provider>
+            </Wrapper>
+          }
+        />
+        <Route
+          path="/merchants"
+          element={
+            <Wrapper>
+              <trpc.Provider client={trpcClient} queryClient={queryClient}>
+                <QueryClientProvider client={queryClient}>
+                  <Merchants />
                 </QueryClientProvider>
               </trpc.Provider>
             </Wrapper>
