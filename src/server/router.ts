@@ -18,22 +18,10 @@ const t = initTRPC.create({
 export const appRouter = t.router({
   getDashboardMeterics: t.procedure.query(async () => {
     try {
-      const popularProducts = await prisma.products.findMany({
+      const popularProducts = await prisma.product.findMany({
         take: 15,
         orderBy: {
-          stockQuantity: "desc",
-        },
-      });
-      const salesSummary = await prisma.salesSummary.findMany({
-        take: 5,
-        orderBy: {
-          date: "desc",
-        },
-      });
-      const purchaseSummary = await prisma.purchaseSummary.findMany({
-        take: 5,
-        orderBy: {
-          date: "desc",
+          currentQuantity: "desc",
         },
       });
       const expenseSummary = await prisma.expenseSummary.findMany({
@@ -59,8 +47,6 @@ export const appRouter = t.router({
 
       return {
         popularProducts,
-        salesSummary,
-        purchaseSummary,
         expenseSummary,
         expenseByCategorySummary,
       };
@@ -72,7 +58,7 @@ export const appRouter = t.router({
     .input(z.string().optional())
     .query(async ({ input: searchParams }) => {
       try {
-        const products = await prisma.products.findMany({
+        const products = await prisma.product.findMany({
           where: {
             name: {
               contains: searchParams ?? "",
@@ -89,26 +75,38 @@ export const appRouter = t.router({
         });
       }
     }),
-  createProducts: t.procedure
+  createProduct: t.procedure
     .input(
       z.object({
         productId: z.string(),
         name: z.string(),
-        price: z.number(),
-        rating: z.number(),
-        stockQuantity: z.number(),
+        wholesalePrice: z.number(),
+        retailPrice: z.number(),
+        purchasedQuantity: z.number(),
+        expiryDate: z.date(),
       })
     )
     .mutation(
-      async ({ input: { productId, name, price, rating, stockQuantity } }) => {
+      async ({
+        input: {
+          productId,
+          name,
+          wholesalePrice,
+          retailPrice,
+          purchasedQuantity,
+          expiryDate,
+        },
+      }) => {
         try {
-          const products = await prisma.products.create({
+          const products = await prisma.product.create({
             data: {
               productId,
               name,
-              price,
-              rating,
-              stockQuantity,
+              wholesalePrice,
+              retailPrice,
+              purchasedQuantity,
+              expiryDate,
+              currentQuantity: purchasedQuantity,
             },
           });
 
@@ -120,13 +118,40 @@ export const appRouter = t.router({
     ),
   getMerchants: t.procedure.query(async () => {
     try {
-      const merchants = await prisma.users.findMany();
+      const merchants = await prisma.merchant.findMany();
 
       return { merchants };
     } catch (error) {
       console.log("Error retrieving merchants", error);
     }
   }),
+  addMerchant: t.procedure
+    .input(
+      z.object({
+        merchantId: z.string(),
+        name: z.string(),
+        phoneNumber: z.string(),
+        location: z.string(),
+      })
+    )
+    .mutation(
+      async ({ input: { merchantId, name, phoneNumber, location } }) => {
+        try {
+          const products = await prisma.merchant.create({
+            data: {
+              merchantId,
+              name,
+              phoneNumber,
+              location,
+            },
+          });
+
+          return products;
+        } catch (error) {
+          console.log("Error creating products", error);
+        }
+      }
+    ),
   getExpensesByCategory: t.procedure.query(async () => {
     try {
       const expenseByCategorySummaryRaw =

@@ -5,9 +5,10 @@ import Header from "@/components/header";
 type ProductFormData = {
   productId: string;
   name: string;
-  price: number;
-  stockQuantity: number;
-  rating: number;
+  wholesalePrice: string;
+  retailPrice: string;
+  purchasedQuantity: number;
+  expiryDate: Date;
 };
 
 type CreateProductModalProps = {
@@ -24,21 +25,32 @@ const CreateProductModal = ({
   const [formData, setFormData] = useState({
     productId: v4(),
     name: "",
-    price: 0,
-    stockQuantity: 0,
-    rating: 0,
+    wholesalePrice: "",
+    retailPrice: "",
+    purchasedQuantity: 0,
+    expiryDate: new Date(),
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]:
-        name === "price" || name === "stockQuantity" || name === "rating"
-          ? parseFloat(value)
+        name === "expiryDate"
+          ? new Date(value) // Convert date string to Date object for expiryDate
+          : name === "wholesalePrice" || name === "retailPrice"
+          ? value // Keep as a string to allow decimal typing
+          : name === "purchasedQuantity"
+          ? value
+            ? parseInt(value)
+            : 0 // Ensure purchasedQuantity is always a number
           : value,
-    });
+    }));
   };
+
+  const formattedExpiryDate = formData.expiryDate
+    ? formData.expiryDate.toISOString().split("T")[0]
+    : "";
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -72,43 +84,68 @@ const CreateProductModal = ({
           />
 
           {/* PRICE */}
-          <label htmlFor="productPrice" className={labelCssStyles}>
-            Price
+          <label htmlFor="wholesalePrice" className={labelCssStyles}>
+            Wholesale Price
           </label>
           <input
-            type="number"
-            name="price"
-            placeholder="Price"
-            onChange={handleChange}
-            value={formData.price}
+            type="text" // Change to text to allow decimal input easily
+            name="wholesalePrice"
+            placeholder="Wholesale Price"
+            onChange={(e) => {
+              const value = e.target.value;
+              // Allow only numbers and one decimal point
+              if (/^\d*\.?\d*$/.test(value)) {
+                handleChange(e);
+              }
+            }}
+            value={formData.wholesalePrice || ""} // Ensure it's a string
+            className={inputCssStyles}
+            required
+          />
+
+          <label htmlFor="retailPrice" className={labelCssStyles}>
+            Retail Price
+          </label>
+          <input
+            type="text"
+            name="retailPrice"
+            placeholder="Retail Price"
+            onChange={(e) => {
+              const value = e.target.value;
+              // Allow only numbers and one decimal point
+              if (/^\d*\.?\d*$/.test(value)) {
+                handleChange(e);
+              }
+            }}
+            value={formData.retailPrice || ""}
             className={inputCssStyles}
             required
           />
 
           {/* STOCK QUANTITY */}
-          <label htmlFor="stockQuantity" className={labelCssStyles}>
-            Stock Quantity
+          <label htmlFor="purchasedQuantity" className={labelCssStyles}>
+            Purchased Quantity
           </label>
           <input
             type="number"
-            name="stockQuantity"
-            placeholder="Stock Quantity"
+            name="purchasedQuantity"
+            placeholder="Purchased Quantity"
             onChange={handleChange}
-            value={formData.stockQuantity}
+            value={formData.purchasedQuantity}
             className={inputCssStyles}
             required
           />
 
-          {/* RATING */}
-          <label htmlFor="rating" className={labelCssStyles}>
-            Rating
+          {/* EXPIRY DATE */}
+          <label htmlFor="expiryDate" className={labelCssStyles}>
+            Expiry Date
           </label>
           <input
-            type="number"
-            name="rating"
-            placeholder="Rating"
+            type="date"
+            name="expiryDate"
+            placeholder="expiryDate"
             onChange={handleChange}
-            value={formData.rating}
+            value={formattedExpiryDate}
             className={inputCssStyles}
             required
           />

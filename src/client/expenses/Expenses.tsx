@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 import { trpc } from "@/util";
-import { ExpenseByCategorySummary } from "@/store/api";
+import { ExpenseByCategorySummary } from "@/store/types";
 
 type AggregatedDataItem = {
   name: string;

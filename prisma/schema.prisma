@@ -2,8 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/client"
+  provider      = "prisma-client-js"
+  output        = "../src/generated/client"
   binaryTargets = ["native", "darwin", "darwin-arm64"]
 }
 
@@ -12,61 +12,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
-  userId String @id
-  name   String
-  email  String
+model Merchant {
+  merchantId  String   @id
+  name        String
+  phoneNumber String
+  location    String
+  orders      Order[]
+  createdAt   DateTime @default(now())
 }
 
-model Products {
-  productId     String      @id
-  name          String
-  price         Float
-  rating        Float?
-  stockQuantity Int
-  Sales         Sales[]
-  Purchases     Purchases[]
+model Product {
+  productId         String   @id
+  name              String
+  purchasedPrice    Float?
+  wholesalePrice    Float
+  retailPrice       Float
+  purchasedQuantity Int
+  expiryDate        DateTime
+  currentQuantity   Int
+  godownQuantity    Int?
+  shopQuantity      Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
-model Sales {
-  saleId      String   @id
-  productId   String
-  timestamp   DateTime
-  quantity    Int
-  unitPrice   Float
-  totalAmount Float
-  product     Products @relation(fields: [productId], references: [productId])
+model Order {
+  orderId String @id
+
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [merchantId], onDelete: Cascade)
+
+  orderedProducts OrderedProduct[]
+  orderDate       DateTime         @default(now())
+
+  totalBill Int
 }
 
-model Purchases {
-  purchaseId String   @id
-  productId  String
-  timestamp  DateTime
-  quantity   Int
-  unitCost   Float
-  totalCost  Float
-  product    Products @relation(fields: [productId], references: [productId])
+model OrderedProduct {
+  orderedProductId String @id
+  name             String
+  quantity         String
+  soldPrice        Float
+  orderId          String
+  order            Order  @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
 }
 
-model Expenses {
-  expenseId String   @id
-  category  String
-  amount    Float
-  timestamp DateTime
-}
-
-model SalesSummary {
-  salesSummaryId   String   @id
-  totalValue       Float
-  changePercentage Float?
-  date             DateTime
-}
-
-model PurchaseSummary {
-  purchaseSummaryId String   @id
-  totalPurchased    Float
-  changePercentage  Float?
-  date              DateTime
+model Expense {
+  expenseId  String   @id
+  category   String
+  amount     Float
+  expendDate DateTime @default(now())
 }
 
 model ExpenseSummary {
@@ -80,7 +75,7 @@ model ExpenseByCategory {
   expenseByCategoryId String         @id
   expenseSummaryId    String
   category            String
-  amount              BigInt
+  amount              Float
   date                DateTime
   expenseSummary      ExpenseSummary @relation(fields: [expenseSummaryId], references: [expenseSummaryId])
 }

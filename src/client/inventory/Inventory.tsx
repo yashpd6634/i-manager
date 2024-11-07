@@ -1,29 +1,93 @@
 import Header from "@/components/header";
 import { trpc } from "@/util";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
 const columns: GridColDef[] = [
-  { field: "productId", headerName: "ID", width: 90 },
   { field: "name", headerName: "Product Name", width: 200 },
   {
-    field: "price",
-    headerName: "Price",
+    field: "wholsalePrice",
+    headerName: "Wholsale Price",
     width: 110,
     type: "number",
-    valueGetter: (value, row) => `$${row.price}`,
+    valueGetter: (value, row) => `₹${row.wholesalePrice}`,
   },
   {
-    field: "rating",
-    headerName: "Rating",
+    field: "retailPrice",
+    headerName: "Retail Price",
     width: 110,
     type: "number",
-    valueGetter: (value, row) => (row.rating ? row.rating : "N/A"),
+    valueGetter: (value, row) => `₹${row.retailPrice}`,
   },
   {
-    field: "stockQuantity",
-    headerName: "Stock Quantity",
+    field: "purchasedQuantity",
+    headerName: "Purchased Quantity",
     width: 150,
     type: "number",
+    valueGetter: (value, row) => `${row.purchasedQuantity}`,
+  },
+  {
+    field: "expiryDate",
+    headerName: "Expiry Date",
+    width: 150,
+    type: "date",
+    valueGetter: (value, row) => {
+      const date = row.expiryDate;
+      return date ? new Date(date) : null;
+    },
+  },
+  {
+    field: "soldQuantity",
+    headerName: "Sold Quantity",
+    width: 150,
+    type: "number",
+    valueGetter: (value, row) => `${row.soldQuantity}`,
+  },
+  {
+    field: "currentQuantity",
+    headerName: "Current Stock Quantity",
+    width: 150,
+    type: "number",
+    valueGetter: (value, row) => `${row.currentQuantity}`,
+  },
+  {
+    field: "godownQuantity",
+    headerName: "Godown Stock Quantity",
+    width: 150,
+    type: "number",
+    valueGetter: (value, row) => `${row.godownQuantity}`,
+  },
+  {
+    field: "shopQuantity",
+    headerName: "Shop Stock Quantity",
+    width: 150,
+    type: "number",
+    valueGetter: (value, row) => `${row.shopQuantity}`,
+  },
+  {
+    field: "createdAt",
+    headerName: "Created At",
+    width: 150,
+    type: "date",
+    valueGetter: (value, row) => new Date(row.createdAt),
+    valueFormatter: (value) => {
+      const date = value as Date;
+      return date
+        ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+        : ""; // Format the date and time
+    },
+  },
+  {
+    field: "updatedAt",
+    headerName: "Updated At",
+    width: 150,
+    type: "date",
+    valueGetter: (value, row) => new Date(row.updatedAt),
+    valueFormatter: (value) => {
+      const date = value as Date;
+      return date
+        ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+        : ""; // Format the date and time
+    },
   },
 ];
 
@@ -47,9 +111,17 @@ const Inventory = () => {
     <div className="flex flex-col">
       <Header name="Inventory" />
       <DataGrid
+        disableColumnFilter
+        disableColumnSelector
         rows={data.products}
         columns={columns}
         getRowId={(row) => row.productId}
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
+        }}
         checkboxSelection
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />

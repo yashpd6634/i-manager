@@ -1,4 +1,4 @@
-import { ExpenseByCategorySummary } from "@/store/api";
+import { ExpenseByCategorySummary } from "@/store/types";
 import { trpc } from "@/util";
 import { TrendingUp } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";

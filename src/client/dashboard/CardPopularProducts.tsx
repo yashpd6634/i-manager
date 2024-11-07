@@ -1,4 +1,4 @@
-import { DashboardMetrics } from "@/store/api";
+import { DashboardMetrics } from "@/store/types";
 import { ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ipcRenderer } from "electron";
@@ -63,7 +63,7 @@ const CardPopularProducts = () => {
                     </div>
                     <div className="flex text-sm items-center">
                       <span className="font-bold text-blue-500 text-xs">
-                        ${product.price}
+                        ${product.wholesalePrice}
                       </span>
                       {/* <span className="mx-2">|</span> */}
                       {/* <Rating rating={product.rating || 0} /> */}
@@ -75,7 +75,7 @@ const CardPopularProducts = () => {
                   <button className="p-2 rounded-full bg-blue-100 text-blue-600 mr-2">
                     <ShoppingBag className="w-4 h-4" />
                   </button>
-                  {Math.round(product.stockQuantity / 1000)}k Sold
+                  {Math.round(product.currentQuantity / 1000)}k Sold
                 </div>
               </div>
             ))}

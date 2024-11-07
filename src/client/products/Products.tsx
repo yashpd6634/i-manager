@@ -1,5 +1,5 @@
 import { PlusCircleIcon, SearchIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CreateProductModal from "./CreateProductModal";
 import { trpc } from "@/util";
 import Header from "@/components/header";
@@ -7,17 +7,19 @@ import Header from "@/components/header";
 type ProductFormData = {
   productId: string;
   name: string;
-  price: number;
-  stockQuantity: number;
-  rating: number;
+  wholesalePrice: string;
+  retailPrice: string;
+  purchasedQuantity: number;
+  expiryDate: Date;
 };
 
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data, isLoading, isError } = trpc.getProducts.useQuery(searchTerm);
-  const mutation = trpc.createProducts.useMutation({
+  const mutation = trpc.createProduct.useMutation({
     onSuccess: () => {
       // Reload the page after successfully creating a product
       window.location.reload();
@@ -25,8 +27,20 @@ const Products = () => {
   });
 
   const handleCreateProduct = (productData: ProductFormData) => {
-    mutation.mutate(productData);
+    console.log(productData.purchasedQuantity);
+    console.log(typeof productData.purchasedQuantity);
+    mutation.mutate({
+      ...productData,
+      wholesalePrice: parseFloat(
+        parseFloat(productData.wholesalePrice).toFixed(2)
+      ),
+      retailPrice: parseFloat(parseFloat(productData.retailPrice).toFixed(2)),
+    });
   };
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [data]);
 
   if (isLoading) {
     return <div className="py-4">Loading...</div>;
@@ -47,6 +61,7 @@ const Products = () => {
         <div className="flex items-center border-2 border-gray-200 rounded">
           <SearchIcon className="w-5 h-5 text-gray-500 m-2" />
           <input
+            ref={inputRef}
             className="w-full py-2 px-4 rounded bg-white"
             placeholder="Search products..."
             value={searchTerm}
@@ -88,9 +103,14 @@ const Products = () => {
                 <h3 className="text-lg text-gray-900 font-semibold">
                   {product.name}
                 </h3>
-                <p className="text-gray-800">${product.price.toFixed(2)}</p>
+                <p className="text-gray-800">
+                  Wholsale Price: ${product.wholesalePrice.toFixed(2)}
+                </p>
+                <p className="text-gray-800">
+                  Retail Price: ${product.retailPrice.toFixed(2)}
+                </p>
                 <div className="text-sm text-gray-600 mt-1">
-                  Stock: {product.stockQuantity}
+                  Stock: {product.currentQuantity}
                 </div>
                 {/* {product.rating && (
                   <div className="flex items-center mt-2">

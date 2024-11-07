@@ -94,7 +94,12 @@ const Sidebar = () => {
             isSidebarCollapsed ? "hidden" : "block"
           } font-extrabold text-xl`}
         >
-          I-Manager
+          <img
+            src="../assets/logo.jpg"
+            width={150}
+            height={150}
+            className="ml-3 rounded-2xl"
+          />
         </h1>
 
         <button
@@ -132,15 +137,15 @@ const Sidebar = () => {
           isCollapsed={isSidebarCollapsed}
         />
         <SidebarLink
-          href="/settings"
-          icon={SlidersHorizontal}
-          label="Settings"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
           href="/expenses"
           icon={IndianRupee}
           label="Expenses"
+          isCollapsed={isSidebarCollapsed}
+        />
+        <SidebarLink
+          href="/settings"
+          icon={SlidersHorizontal}
+          label="Settings"
           isCollapsed={isSidebarCollapsed}
         />
       </div>
