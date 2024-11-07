@@ -12,6 +12,7 @@ import Products from "./products/Products";
 import Merchants from "./merchants/Merchants";
 import Settings from "./settings/Settings";
 import Expenses from "./expenses/Expenses";
+import Orders from "./orders/Orders";
 
 function App() {
   const [queryClient] = useState(
@@ -106,6 +107,18 @@ function App() {
               <trpc.Provider client={trpcClient} queryClient={queryClient}>
                 <QueryClientProvider client={queryClient}>
                   <Products />
+                </QueryClientProvider>
+              </trpc.Provider>
+            </Wrapper>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <Wrapper>
+              <trpc.Provider client={trpcClient} queryClient={queryClient}>
+                <QueryClientProvider client={queryClient}>
+                  <Orders />
                 </QueryClientProvider>
               </trpc.Provider>
             </Wrapper>

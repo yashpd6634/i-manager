@@ -9,6 +9,7 @@ const columns: GridColDef[] = [
   { field: "name", headerName: "Name", width: 200 },
   { field: "phoneNumber", headerName: "Phone Number", width: 200 },
   { field: "location", headerName: "Location", width: 200 },
+  { field: "balance", headerName: "Balance", width: 200 },
 ];
 
 type MerchantFormData = {
@@ -16,6 +17,7 @@ type MerchantFormData = {
   name: string;
   phoneNumber: string;
   location: string;
+  balance: number;
 };
 
 const Merchants = () => {

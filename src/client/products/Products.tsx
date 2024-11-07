@@ -27,8 +27,6 @@ const Products = () => {
   });
 
   const handleCreateProduct = (productData: ProductFormData) => {
-    console.log(productData.purchasedQuantity);
-    console.log(typeof productData.purchasedQuantity);
     mutation.mutate({
       ...productData,
       wholesalePrice: parseFloat(

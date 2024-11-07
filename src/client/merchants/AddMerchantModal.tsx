@@ -7,6 +7,7 @@ type MerchantFormData = {
   name: string;
   phoneNumber: string;
   location: string;
+  balance: number;
 };
 
 type CreateMerchantModalProps = {
@@ -25,6 +26,7 @@ const CreateMerchantModal = ({
     name: "",
     phoneNumber: "",
     location: "",
+    balance: 0,
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

@@ -172,6 +172,46 @@ export const appRouter = t.router({
       console.log("Error retrieving expenses by category", error);
     }
   }),
+  getOrders: t.procedure.query(async () => {
+    try {
+      const orders = await prisma.order.findMany({
+        include: {
+          merchant: true,
+        },
+      });
+
+      return { orders };
+    } catch (error) {
+      console.log("Error retrieving orders", error);
+    }
+  }),
+  takeOrder: t.procedure
+    .input(
+      z.object({
+        merchantId: z.string(),
+        name: z.string(),
+        phoneNumber: z.string(),
+        location: z.string(),
+      })
+    )
+    .mutation(
+      async ({ input: { merchantId, name, phoneNumber, location } }) => {
+        try {
+          const products = await prisma.merchant.create({
+            data: {
+              merchantId,
+              name,
+              phoneNumber,
+              location,
+            },
+          });
+
+          return products;
+        } catch (error) {
+          console.log("Error creating products", error);
+        }
+      }
+    ),
 });
 
 export type AppRouter = typeof appRouter;

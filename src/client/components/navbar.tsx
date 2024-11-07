@@ -57,7 +57,7 @@ const Navbar = () => {
               height={50}
               className="rounded-full h-full object-cover"
             />
-            <span className="font-semibold">Ed Roh</span>
+            <span className="font-semibold">PM Trade World</span>
           </div>
         </div>
         <Link to="/settings">

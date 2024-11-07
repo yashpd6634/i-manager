@@ -3,6 +3,7 @@ import { trpc } from "@/util";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
 const columns: GridColDef[] = [
+  { field: "productId", headerName: "Product ID", width: 200 },
   { field: "name", headerName: "Product Name", width: 200 },
   {
     field: "wholsalePrice",

@@ -18,6 +18,7 @@ model Merchant {
   phoneNumber String
   location    String
   orders      Order[]
+  balance     Int
   createdAt   DateTime @default(now())
 }
 
@@ -34,6 +35,10 @@ model Product {
   shopQuantity      Int?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  orderedProduct OrderedProduct?
+
+  @@map("product")
 }
 
 model Order {
@@ -46,6 +51,7 @@ model Order {
   orderDate       DateTime         @default(now())
 
   totalBill Int
+  totalPaid Int
 }
 
 model OrderedProduct {
@@ -53,8 +59,13 @@ model OrderedProduct {
   name             String
   quantity         String
   soldPrice        Float
+  productId        String @unique
   orderId          String
   order            Order  @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+
+  product Product @relation(fields: [productId], references: [productId])
+
+  @@map("orderedProduct")
 }
 
 model Expense {
