@@ -3,29 +3,53 @@ import { v4 } from "uuid";
 import Header from "@/components/header";
 import { trpc } from "@/util";
 import {
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
   TextField,
   Button,
   CircularProgress,
   Autocomplete,
-  SelectChangeEvent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
 } from "@mui/material";
 import { CircleX } from "lucide-react";
 
 type OrderFormData = {
   orderId: string;
   merchantId: string;
-  products: { productId: string; quantity: number; soldPrice: number }[];
+  products: {
+    productId: string;
+    name: string;
+    quantity: number;
+    soldPrice: number;
+    wholesalePrice: number;
+    retailPrice: number;
+    availableQuantity: number;
+  }[];
   totalBill: number;
+  totalPaid: number;
+};
+
+type SubmitOrderFormData = {
+  orderId: string;
+  merchantId: string;
+  products: {
+    productId: string;
+    name: string;
+    quantity: number;
+    soldPrice: number;
+  }[];
+  totalBill: number;
+  totalPaid: number;
 };
 
 type CreateOrderModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (formData: OrderFormData) => void;
+  onCreate: (formData: SubmitOrderFormData) => void;
 };
 
 const TakeOrderModal = ({
@@ -38,6 +62,7 @@ const TakeOrderModal = ({
     merchantId: "",
     products: [],
     totalBill: 0,
+    totalPaid: 0,
   });
 
   const { data: merchantData, isLoading: isMerchantsLoading } =
@@ -52,8 +77,16 @@ const TakeOrderModal = ({
     }));
   };
 
-  const handleAddProduct = (productId: string) => {
-    const newProduct = { productId, quantity: 1, soldPrice: 0 };
+  const handleAddProduct = (product: any) => {
+    const newProduct = {
+      productId: product.productId,
+      name: product.name,
+      quantity: 1,
+      soldPrice: product.wholesalePrice,
+      wholesalePrice: product.wholesalePrice,
+      retailPrice: product.retailPrice,
+      availableQuantity: product.currentQuantity,
+    };
     setFormData((prev) => ({
       ...prev,
       products: [...prev.products, newProduct],
@@ -83,23 +116,45 @@ const TakeOrderModal = ({
     setFormData((prev) => ({ ...prev, totalBill }));
   };
 
+  const handleTotalPaidChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      totalPaid: parseFloat(e.target.value) || 0,
+    }));
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onCreate(formData);
+
+    const filteredFormData = {
+      ...formData,
+      products: formData.products.map(
+        ({ productId, name, quantity, soldPrice }) => ({
+          productId,
+          name,
+          quantity,
+          soldPrice,
+        })
+      ),
+    };
+
+    onCreate(filteredFormData);
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-full max-w-5xl shadow-lg rounded-md bg-white">
         <Header name="Take New Order" />
         <form onSubmit={handleSubmit} className="mt-5">
           {/* Merchant Selection */}
           <Autocomplete
             options={merchantData?.merchants || []}
-            getOptionLabel={(option) => option.name || ""}
+            getOptionLabel={(option) =>
+              `${option.name} (Ph - ${option.phoneNumber})` || ""
+            }
             onChange={(event, value) => handleMerchantChange(value)}
             renderInput={(params) => (
               <TextField
@@ -120,9 +175,7 @@ const TakeOrderModal = ({
             getOptionLabel={(option) =>
               `${option.name} (ID - ${option.productId})` || ""
             }
-            onChange={(event, value) =>
-              value && handleAddProduct(value.productId)
-            }
+            onChange={(event, value) => value && handleAddProduct(value)}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -130,49 +183,98 @@ const TakeOrderModal = ({
                 placeholder="Search products"
               />
             )}
+            loading={isProductsLoading}
           />
 
-          {/* Display selected products and inputs for quantity and sold price */}
-          {formData.products.map((product, index) => (
-            <div key={index} className="flex items-center my-4">
-              <TextField
-                label="Quantity"
-                type="number"
-                value={product.quantity}
-                onChange={(e) =>
-                  handleProductChange(index, "quantity", e.target.value)
-                }
-                required
-                className="mr-2"
-              />
-              <TextField
-                label="Sold Price"
-                type="number"
-                value={product.soldPrice}
-                onChange={(e) =>
-                  handleProductChange(index, "soldPrice", e.target.value)
-                }
-                required
-                className="mr-2"
-              />
-              <Button
-                variant="text"
-                color="secondary"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    products: prev.products.filter((_, i) => i !== index),
-                  }))
-                }
-              >
-                <CircleX />
-              </Button>
-            </div>
-          ))}
+          {/* Products Table */}
+          <TableContainer component={Paper} className="mt-4">
+            <Table aria-label="Selected Products Table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Product ID</TableCell>
+                  <TableCell>Product Name</TableCell>
+                  <TableCell>Buying Quantity</TableCell>
+                  <TableCell>Selling Price</TableCell>
+                  <TableCell>Wholesale Price</TableCell>
+                  <TableCell>Retail Price</TableCell>
+                  <TableCell>Available Quantity</TableCell>
+                  <TableCell>Remove</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {formData.products.map((product, index) => (
+                  <TableRow key={product.productId}>
+                    <TableCell>{product.productId}</TableCell>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>
+                      <TextField
+                        type="number"
+                        value={product.quantity}
+                        onChange={(e) =>
+                          handleProductChange(index, "quantity", e.target.value)
+                        }
+                        required
+                        fullWidth
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        type="number"
+                        value={product.soldPrice}
+                        onChange={(e) =>
+                          handleProductChange(
+                            index,
+                            "soldPrice",
+                            e.target.value
+                          )
+                        }
+                        required
+                        fullWidth
+                      />
+                    </TableCell>
+                    <TableCell>
+                      ₹{product.wholesalePrice * product.quantity}
+                    </TableCell>
+                    <TableCell>
+                      ₹{product.retailPrice * product.quantity}
+                    </TableCell>
+                    <TableCell>{product.availableQuantity}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="text"
+                        color="secondary"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            products: prev.products.filter(
+                              (_, i) => i !== index
+                            ),
+                          }))
+                        }
+                      >
+                        <CircleX />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
           {/* Total Bill */}
-          <div className="mt-4">
+          <div className="mt-4 text-xl font-bold text-green-500">
             <h4>Total Bill: ₹{formData.totalBill}</h4>
+          </div>
+
+          {/* Total Paid */}
+          <div className="mt-4">
+            <TextField
+              label="Total Paid"
+              value={formData.totalPaid}
+              onChange={handleTotalPaidChange}
+              type="number"
+              fullWidth
+            />
           </div>
 
           {/* Submit and Cancel Actions */}

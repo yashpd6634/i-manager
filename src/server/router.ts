@@ -24,31 +24,16 @@ export const appRouter = t.router({
           currentQuantity: "desc",
         },
       });
-      const expenseSummary = await prisma.expenseSummary.findMany({
+      const expenseSummary = await prisma.expense.findMany({
         take: 5,
         orderBy: {
-          date: "desc",
+          expendDate: "desc",
         },
       });
-      const expenseByCategorySummaryRaw =
-        await prisma.expenseByCategory.findMany({
-          take: 5,
-          orderBy: {
-            date: "desc",
-          },
-        });
-
-      const expenseByCategorySummary = expenseByCategorySummaryRaw.map(
-        (item) => ({
-          ...item,
-          amount: item.amount.toString(),
-        })
-      );
 
       return {
         popularProducts,
         expenseSummary,
-        expenseByCategorySummary,
       };
     } catch (error) {
       console.log("API Failed: ", error);
@@ -152,26 +137,89 @@ export const appRouter = t.router({
         }
       }
     ),
-  getExpensesByCategory: t.procedure.query(async () => {
+  getExpenses: t.procedure.query(async () => {
     try {
-      const expenseByCategorySummaryRaw =
-        await prisma.expenseByCategory.findMany({
-          orderBy: {
-            date: "desc",
-          },
-        });
-      const expenseByCategorySummary = expenseByCategorySummaryRaw.map(
-        (item) => ({
+      const expenses = await prisma.expense.findMany({
+        orderBy: {
+          expendDate: "desc",
+        },
+      });
+
+      // Aggregate data by category and calculate total expenses
+      const expenseByCategory = expenses.reduce((acc, expense) => {
+        if (!acc[expense.category]) {
+          acc[expense.category] = { category: expense.category, amount: 0 };
+        }
+        acc[expense.category].amount += expense.amount;
+        return acc;
+      }, {} as Record<string, { category: string; amount: number }>);
+
+      // Create a unique color for each category
+      const colorPalette = [
+        "#FF6347",
+        "#4682B4",
+        "#32CD32",
+        "#FFD700",
+        "#8A2BE2",
+        "#D2691E",
+        "#FF1493",
+        "#00BFFF",
+        "#8B0000",
+        "#A52A2A",
+      ];
+
+      const categoryData = Object.values(expenseByCategory).map(
+        (item, index) => ({
           ...item,
-          amount: item.amount.toString(),
+          color: colorPalette[index % colorPalette.length], // Cycle through colors
         })
       );
 
-      return { expenseByCategorySummary };
+      const totalExpenses = expenses.reduce(
+        (sum, expense) => sum + expense.amount,
+        0
+      );
+
+      return {
+        expenses,
+        expenseByCategory: categoryData,
+        totalExpenses,
+      };
     } catch (error) {
-      console.log("Error retrieving expenses by category", error);
+      console.log("Error retrieving expenses", error);
     }
   }),
+  addExpense: t.procedure
+    .input(
+      z.object({
+        category: z.string(),
+        amount: z.number(),
+        expendDate: z.date(),
+        description: z.string(),
+      })
+    )
+    .mutation(
+      async ({ input: { category, amount, expendDate, description } }) => {
+        try {
+          const expense = await prisma.expense.create({
+            data: {
+              category,
+              amount,
+              expendDate,
+              description: description ?? "",
+            },
+          });
+
+          return expense;
+        } catch (error) {
+          console.error("Error creating expense:", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create expense",
+          });
+        }
+      }
+    ),
   getOrders: t.procedure.query(async () => {
     try {
       const orders = await prisma.order.findMany({
@@ -188,27 +236,78 @@ export const appRouter = t.router({
   takeOrder: t.procedure
     .input(
       z.object({
+        orderId: z.string(),
         merchantId: z.string(),
-        name: z.string(),
-        phoneNumber: z.string(),
-        location: z.string(),
+        products: z.array(
+          z.object({
+            productId: z.string(),
+            name: z.string(),
+            quantity: z.number(),
+            soldPrice: z.number(),
+          })
+        ),
+        totalBill: z.number(),
+        totalPaid: z.number(),
       })
     )
     .mutation(
-      async ({ input: { merchantId, name, phoneNumber, location } }) => {
+      async ({
+        input: { orderId, merchantId, products, totalBill, totalPaid },
+      }) => {
         try {
-          const products = await prisma.merchant.create({
-            data: {
-              merchantId,
-              name,
-              phoneNumber,
-              location,
-            },
+          // Start transaction for atomic operations
+          const result = await prisma.$transaction(async (prisma) => {
+            // Step 1: Create the order
+            const order = await prisma.order.create({
+              data: {
+                orderId,
+                merchantId,
+                totalBill,
+                totalPaid,
+              },
+            });
+
+            // Step 2: Create ordered products and update quantities
+            for (const product of products) {
+              await prisma.orderedProduct.create({
+                data: {
+                  orderId: order.orderId,
+                  productId: product.productId,
+                  name: product.name,
+                  quantity: product.quantity,
+                  soldPrice: product.soldPrice,
+                },
+              });
+
+              // Update current quantity of the product
+              await prisma.product.update({
+                where: { productId: product.productId },
+                data: {
+                  currentQuantity: {
+                    decrement: product.quantity,
+                  },
+                },
+              });
+            }
+
+            // Step 3: Update merchant's balance
+            await prisma.merchant.update({
+              where: { merchantId },
+              data: {
+                balance: {
+                  increment: totalPaid - totalBill,
+                },
+              },
+            });
+
+            // Only return the order details
+            return order;
           });
 
-          return products;
+          return result;
         } catch (error) {
-          console.log("Error creating products", error);
+          console.error("Error processing order:", error);
+          throw new Error("Order processing failed");
         }
       }
     ),

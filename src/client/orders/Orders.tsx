@@ -6,12 +6,12 @@ import { useState } from "react";
 import TakeOrderModal from "./TakeOrderModal";
 
 const columns: GridColDef[] = [
-  { field: "orderId", headerName: "Order ID", width: 150 },
-  { field: "merchantName", headerName: "Merchant Name", width: 200 },
+  { field: "orderId", headerName: "Order ID", width: 100 },
+  { field: "merchantName", headerName: "Merchant Name", width: 150 },
   {
     field: "merchantPhoneNumber",
     headerName: "Merchant Phone Number",
-    width: 180,
+    width: 100,
   },
   { field: "merchantLocation", headerName: "Merchant Location", width: 200 },
   {
@@ -27,14 +27,21 @@ const columns: GridColDef[] = [
         : "";
     },
   },
-  { field: "totalBill", headerName: "Total Bill", width: 150, type: "number" },
+  { field: "totalBill", headerName: "Total Bill", width: 100, type: "number" },
+  { field: "totalPaid", headerName: "Total Paid", width: 100, type: "number" },
 ];
 
 type OrderFormData = {
   orderId: string;
   merchantId: string;
-  products: { productId: string; quantity: number; soldPrice: number }[];
+  products: {
+    productId: string;
+    name: string;
+    quantity: number;
+    soldPrice: number;
+  }[];
   totalBill: number;
+  totalPaid: number;
 };
 
 const Orders = () => {
@@ -50,7 +57,7 @@ const Orders = () => {
   });
 
   const handleTakeOrder = (orderData: OrderFormData) => {
-    // mutation.mutate(orderData);
+    mutation.mutate(orderData);
   };
 
   if (isLoading) {
@@ -72,6 +79,7 @@ const Orders = () => {
     merchantLocation: order.merchant.location,
     orderDate: order.orderDate,
     totalBill: order.totalBill,
+    totalPaid: order.totalPaid,
   }));
 
   return (

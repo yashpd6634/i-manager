@@ -1,13 +1,13 @@
 import Header from "@/components/header";
 import { trpc } from "@/util";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import AddMerchantModal from "./AddMerchantModal";
 
 const columns: GridColDef[] = [
   { field: "name", headerName: "Name", width: 200 },
-  { field: "phoneNumber", headerName: "Phone Number", width: 200 },
+  { field: "phoneNumber", headerName: "Phone Number", width: 100 },
   { field: "location", headerName: "Location", width: 200 },
   { field: "balance", headerName: "Balance", width: 200 },
 ];
@@ -58,9 +58,17 @@ const Merchants = () => {
         </button>
       </div>
       <DataGrid
+        disableColumnFilter
+        disableColumnSelector
         rows={data.merchants}
         columns={columns}
         getRowId={(row) => row.merchantId}
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
+        }}
         checkboxSelection
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />

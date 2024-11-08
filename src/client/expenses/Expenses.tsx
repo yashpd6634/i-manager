@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import Header from "@/components/header";
+import { trpc } from "@/util";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import { PlusCircleIcon } from "lucide-react";
 import {
   Cell,
   Legend,
@@ -8,66 +11,59 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { trpc } from "@/util";
-import { ExpenseByCategorySummary } from "@/store/types";
+import AddExpenseModal from "./AddExpenseModal";
 
-type AggregatedDataItem = {
-  name: string;
-  color?: string;
-  amount: number;
+// Define the ExpenseFormData type directly here
+type ExpenseFormData = {
+  category: string;
+  amount: string;
+  expendDate: Date; // Or Date, depending on how you manage the date
+  description: string;
 };
 
-type AggregatedData = {
-  [category: string]: AggregatedDataItem;
-};
+const columns: GridColDef[] = [
+  { field: "category", headerName: "Category", width: 200 },
+  { field: "amount", headerName: "Amount", width: 200 },
+  { field: "expendDate", headerName: "Expense Date", width: 200 },
+  { field: "description", headerName: "Description", width: 250 },
+];
 
 const Expenses = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const { data, isLoading, isError } = trpc.getExpensesByCategory.useQuery();
-  const expenses = useMemo(
-    () => data?.expenseByCategorySummary ?? [],
-    [data?.expenseByCategorySummary]
-  );
+  const { data, isLoading, isError } = trpc.getExpenses.useQuery();
+  const mutation = trpc.addExpense.useMutation({
+    onSuccess: () => {
+      // Reload the page after successfully adding an expense
+      window.location.reload();
+    },
+  });
 
-  const parseDate = (date: Date) => {
-    const dataDate = new Date(date); // Ensure it's a Date object
-    const year = dataDate.getFullYear();
-    const month = String(dataDate.getMonth() + 1).padStart(2, "0");
-    const day = String(dataDate.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+  const handleAddExpense = (expenseData: ExpenseFormData) => {
+    mutation.mutate({
+      ...expenseData,
+      amount: parseFloat(parseFloat(expenseData.amount).toFixed(2)),
+    });
   };
 
-  const aggregatedData: AggregatedDataItem[] = useMemo(() => {
-    const filtered: AggregatedData = expenses
-      .filter((data) => {
-        const matchesCategory =
-          selectedCategory === "All" || data.category === selectedCategory;
-        const formattedDataDate = parseDate(data.date);
+  const expenses = useMemo(() => data?.expenses ?? [], [data]);
+  const aggregatedData = useMemo(() => data?.expenseByCategory ?? [], [data]);
+  const totalExpenses = data?.totalExpenses ?? 0;
 
-        const matchesDate =
-          !startDate ||
-          !endDate ||
-          (formattedDataDate >= startDate && formattedDataDate <= endDate);
-        return matchesCategory && matchesDate;
-      })
-      .reduce((acc: AggregatedData, data) => {
-        const amount = parseInt(data.amount);
-        if (!acc[data.category]) {
-          acc[data.category] = { name: data.category, amount: 0 };
-          acc[data.category].color = `#${Math.floor(
-            Math.random() * 16777215
-          ).toString(16)}`;
-          acc[data.category].amount += amount;
-        }
-        return acc;
-      }, {});
-
-    return Object.values(filtered);
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter((expense) => {
+      const expenseDate = new Date(expense.expendDate);
+      const matchesCategory =
+        selectedCategory === "All" || expense.category === selectedCategory;
+      const matchesDate =
+        (!startDate || new Date(startDate) <= expenseDate) &&
+        (!endDate || new Date(endDate) >= expenseDate);
+      return matchesCategory && matchesDate;
+    });
   }, [expenses, selectedCategory, startDate, endDate]);
 
   const classNames = {
@@ -76,29 +72,28 @@ const Expenses = () => {
       "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md",
   };
 
-  if (isLoading) {
-    return <div className="py-4">Loading...</div>;
-  }
+  if (isLoading) return <div className="py-4">Loading...</div>;
 
-  if (isError || !data?.expenseByCategorySummary) {
+  if (isError || !data)
     return (
       <div className="text-center text-red-500 py-4">
         Failed to fetch expenses
       </div>
     );
-  }
 
   return (
-    <div>
-      {/* HEADER */}
-      <div className="mb-5">
+    <div className="flex flex-col">
+      <div className="flex justify-between items-center mb-6">
         <Header name="Expenses" />
-        <p className="text-sm text-gray-500">
-          A visual representation of expenses over time.
-        </p>
+        <button
+          className="flex items-center bg-blue-500 hover:bg-blue-700 text-gray-200 font-bold py-2 px-4 rounded"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <PlusCircleIcon className="w-5 h-5 mr-2 !text-gray-200" /> Add Expense
+        </button>
       </div>
 
-      {/* FILTERS */}
+      {/* Filter and Pie Chart */}
       <div className="flex flex-col md:flex-row justify-between gap-4">
         <div className="w-full md:w-1/3 bg-white shadow rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-4">
@@ -151,7 +146,7 @@ const Expenses = () => {
             </div>
           </div>
         </div>
-        {/* PIE CHART */}
+        {/* Pie Chart */}
         <div className="flex-grow bg-white shadow rounded-lg p-4 md:p-6">
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
@@ -165,16 +160,14 @@ const Expenses = () => {
                 dataKey="amount"
                 onMouseEnter={(_, index) => setActiveIndex(index)}
               >
-                {aggregatedData.map(
-                  (entry: AggregatedDataItem, index: number) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={
-                        index === activeIndex ? "rgb(29, 78, 216)" : entry.color
-                      }
-                    />
-                  )
-                )}
+                {aggregatedData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      index === activeIndex ? "rgb(29, 78, 216)" : entry.color
+                    }
+                  />
+                ))}
               </Pie>
               <Tooltip />
               <Legend />
@@ -182,6 +175,37 @@ const Expenses = () => {
           </ResponsiveContainer>
         </div>
       </div>
+
+      <div className="mt-4 text-xl font-bold text-red-500">
+        <h4>Total Expense: ₹{totalExpenses}</h4>
+      </div>
+
+      {/* Expenses Table */}
+      <div className="mt-6 bg-white shadow rounded-lg overflow-hidden">
+        <h3 className="text-lg font-semibold px-6 py-4">Expense Details</h3>
+        <DataGrid
+          disableColumnFilter
+          disableColumnSelector
+          rows={filteredExpenses}
+          columns={columns}
+          getRowId={(row) => row.expenseId} // Assuming each expense has an expenseId
+          slots={{ toolbar: GridToolbar }}
+          slotProps={{
+            toolbar: {
+              showQuickFilter: true,
+            },
+          }}
+          checkboxSelection
+          className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
+        />
+      </div>
+
+      {/* Add Expense Modal */}
+      <AddExpenseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAdd={handleAddExpense}
+      />
     </div>
   );
 };

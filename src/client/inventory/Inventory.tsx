@@ -3,33 +3,33 @@ import { trpc } from "@/util";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 
 const columns: GridColDef[] = [
-  { field: "productId", headerName: "Product ID", width: 200 },
+  { field: "productId", headerName: "Product ID", width: 100 },
   { field: "name", headerName: "Product Name", width: 200 },
   {
     field: "wholsalePrice",
     headerName: "Wholsale Price",
-    width: 110,
+    width: 100,
     type: "number",
     valueGetter: (value, row) => `₹${row.wholesalePrice}`,
   },
   {
     field: "retailPrice",
     headerName: "Retail Price",
-    width: 110,
+    width: 100,
     type: "number",
     valueGetter: (value, row) => `₹${row.retailPrice}`,
   },
   {
     field: "purchasedQuantity",
     headerName: "Purchased Quantity",
-    width: 150,
+    width: 100,
     type: "number",
     valueGetter: (value, row) => `${row.purchasedQuantity}`,
   },
   {
     field: "expiryDate",
     headerName: "Expiry Date",
-    width: 150,
+    width: 100,
     type: "date",
     valueGetter: (value, row) => {
       const date = row.expiryDate;
@@ -39,35 +39,36 @@ const columns: GridColDef[] = [
   {
     field: "soldQuantity",
     headerName: "Sold Quantity",
-    width: 150,
+    width: 100,
     type: "number",
-    valueGetter: (value, row) => `${row.soldQuantity}`,
+    valueGetter: (value, row) =>
+      `${row.purchasedQuantity - row.currentQuantity}`,
   },
   {
     field: "currentQuantity",
     headerName: "Current Stock Quantity",
-    width: 150,
+    width: 100,
     type: "number",
     valueGetter: (value, row) => `${row.currentQuantity}`,
   },
   {
     field: "godownQuantity",
     headerName: "Godown Stock Quantity",
-    width: 150,
+    width: 100,
     type: "number",
     valueGetter: (value, row) => `${row.godownQuantity}`,
   },
   {
     field: "shopQuantity",
     headerName: "Shop Stock Quantity",
-    width: 150,
+    width: 100,
     type: "number",
     valueGetter: (value, row) => `${row.shopQuantity}`,
   },
   {
     field: "createdAt",
     headerName: "Created At",
-    width: 150,
+    width: 100,
     type: "date",
     valueGetter: (value, row) => new Date(row.createdAt),
     valueFormatter: (value) => {
@@ -80,7 +81,7 @@ const columns: GridColDef[] = [
   {
     field: "updatedAt",
     headerName: "Updated At",
-    width: 150,
+    width: 100,
     type: "date",
     valueGetter: (value, row) => new Date(row.updatedAt),
     valueFormatter: (value) => {

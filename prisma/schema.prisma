@@ -18,7 +18,7 @@ model Merchant {
   phoneNumber String
   location    String
   orders      Order[]
-  balance     Int
+  balance     Int      @default(0)
   createdAt   DateTime @default(now())
 }
 
@@ -55,9 +55,9 @@ model Order {
 }
 
 model OrderedProduct {
-  orderedProductId String @id
+  orderedProductId String @id @default(uuid())
   name             String
-  quantity         String
+  quantity         Int
   soldPrice        Float
   productId        String @unique
   orderId          String
@@ -69,24 +69,10 @@ model OrderedProduct {
 }
 
 model Expense {
-  expenseId  String   @id
-  category   String
-  amount     Float
-  expendDate DateTime @default(now())
-}
-
-model ExpenseSummary {
-  expenseSummaryId  String              @id
-  totalExpenses     Float
-  date              DateTime
-  ExpenseByCategory ExpenseByCategory[]
-}
-
-model ExpenseByCategory {
-  expenseByCategoryId String         @id
-  expenseSummaryId    String
-  category            String
-  amount              Float
-  date                DateTime
-  expenseSummary      ExpenseSummary @relation(fields: [expenseSummaryId], references: [expenseSummaryId])
+  expenseId   String   @id @default(uuid())
+  category    String
+  amount      Float
+  expendDate  DateTime
+  createdAt   DateTime @default(now())
+  description String
 }
