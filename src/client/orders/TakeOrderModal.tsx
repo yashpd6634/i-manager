@@ -15,6 +15,9 @@ import {
   TableRow,
   Paper,
   Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { CircleX } from "lucide-react";
 
@@ -29,6 +32,7 @@ type OrderFormData = {
     wholesalePrice: number;
     retailPrice: number;
     availableQuantity: number;
+    stockSource: "Godown" | "Shop";
   }[];
   totalBill: number;
   totalPaid: number;
@@ -42,6 +46,7 @@ type SubmitOrderFormData = {
     name: string;
     quantity: number;
     soldPrice: number;
+    stockSource: "Godown" | "Shop";
   }[];
   totalBill: number;
   totalPaid: number;
@@ -80,6 +85,7 @@ const TakeOrderModal = ({
   };
 
   const handleAddProduct = (product: any) => {
+    const godownQuantity = product.currentQuantity - product.inShopQuantity;
     const newProduct = {
       productId: product.productId,
       name: product.name,
@@ -87,12 +93,31 @@ const TakeOrderModal = ({
       soldPrice: product.wholesalePrice,
       wholesalePrice: product.wholesalePrice,
       retailPrice: product.retailPrice,
-      availableQuantity: product.currentQuantity,
+      availableQuantity: godownQuantity,
+      stockSource: "Godown" as const,
     };
     setFormData((prev) => ({
       ...prev,
       products: [...prev.products, newProduct],
     }));
+  };
+
+  const handleSourceChange = (
+    index: number,
+    stockSource: "Godown" | "Shop"
+  ) => {
+    const newProducts = [...formData.products];
+    const product = productData?.products.find(
+      (p) => p.productId === newProducts[index].productId
+    );
+    if (product) {
+      newProducts[index].stockSource = stockSource;
+      newProducts[index].availableQuantity =
+        stockSource === "Godown"
+          ? product.currentQuantity - product.inShopQuantity
+          : product.inShopQuantity;
+      setFormData({ ...formData, products: newProducts });
+    }
   };
 
   const handleProductChange = (index: number, field: string, value: string) => {
@@ -147,11 +172,12 @@ const TakeOrderModal = ({
     const filteredFormData = {
       ...formData,
       products: formData.products.map(
-        ({ productId, name, quantity, soldPrice }) => ({
+        ({ productId, name, quantity, soldPrice, stockSource }) => ({
           productId,
           name,
           quantity,
           soldPrice,
+          stockSource,
         })
       ),
     };
@@ -216,6 +242,7 @@ const TakeOrderModal = ({
                   <TableCell>Wholesale Price</TableCell>
                   <TableCell>Retail Price</TableCell>
                   <TableCell>Available Quantity</TableCell>
+                  <TableCell>Stock Source</TableCell>
                   <TableCell>Remove</TableCell>
                 </TableRow>
               </TableHead>
@@ -224,7 +251,7 @@ const TakeOrderModal = ({
                   <TableRow key={product.productId}>
                     <TableCell>{product.productId}</TableCell>
                     <TableCell>{product.name}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ width: 150 }}>
                       <TextField
                         type="number"
                         value={product.quantity}
@@ -241,7 +268,7 @@ const TakeOrderModal = ({
                         </div>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ width: 150 }}>
                       <TextField
                         type="number"
                         value={product.soldPrice}
@@ -262,10 +289,26 @@ const TakeOrderModal = ({
                     <TableCell>
                       ₹{product.retailPrice * product.quantity}
                     </TableCell>
+                    <TableCell>{product.availableQuantity}</TableCell>
                     <TableCell>
-                      {product.availableQuantity} <Select></Select>
+                      <FormControl fullWidth>
+                        <InputLabel>Stock Source</InputLabel>
+                        <Select
+                          value={product.stockSource}
+                          onChange={(e) =>
+                            handleSourceChange(
+                              index,
+                              e.target.value as "Godown" | "Shop"
+                            )
+                          }
+                          label="Stock Source"
+                        >
+                          <MenuItem value="Godown">Godown</MenuItem>
+                          <MenuItem value="Shop">Shop</MenuItem>
+                        </Select>
+                      </FormControl>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ width: 10 }}>
                       <Button
                         variant="text"
                         color="secondary"

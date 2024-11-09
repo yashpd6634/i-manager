@@ -39,6 +39,7 @@ type OrderFormData = {
     name: string;
     quantity: number;
     soldPrice: number;
+    stockSource: "Godown" | "Shop";
   }[];
   totalBill: number;
   totalPaid: number;

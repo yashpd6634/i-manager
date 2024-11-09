@@ -244,6 +244,7 @@ export const appRouter = t.router({
             name: z.string(),
             quantity: z.number(),
             soldPrice: z.number(),
+            stockSource: z.enum(["Godown", "Shop"]), // Add stockSource here
           })
         ),
         totalBill: z.number(),
@@ -279,13 +280,18 @@ export const appRouter = t.router({
                 },
               });
 
-              // Update current quantity of the product
+              // Conditionally decrement quantities based on stockSource
               await prisma.product.update({
                 where: { productId: product.productId },
                 data: {
                   currentQuantity: {
                     decrement: product.quantity,
                   },
+                  ...(product.stockSource === "Shop" && {
+                    inShopQuantity: {
+                      decrement: product.quantity,
+                    },
+                  }),
                 },
               });
             }
