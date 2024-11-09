@@ -94,7 +94,6 @@ const Orders = () => {
         </button>
       </div>
       <DataGrid
-        disableColumnFilter
         disableColumnSelector
         rows={rows}
         columns={columns}

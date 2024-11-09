@@ -184,7 +184,6 @@ const Expenses = () => {
       <div className="mt-6 bg-white shadow rounded-lg overflow-hidden">
         <h3 className="text-lg font-semibold px-6 py-4">Expense Details</h3>
         <DataGrid
-          disableColumnFilter
           disableColumnSelector
           rows={filteredExpenses}
           columns={columns}

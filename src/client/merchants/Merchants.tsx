@@ -58,7 +58,6 @@ const Merchants = () => {
         </button>
       </div>
       <DataGrid
-        disableColumnFilter
         disableColumnSelector
         rows={data.merchants}
         columns={columns}

@@ -113,7 +113,6 @@ const Inventory = () => {
     <div className="flex flex-col">
       <Header name="Inventory" />
       <DataGrid
-        disableColumnFilter
         disableColumnSelector
         rows={data.products}
         columns={columns}
