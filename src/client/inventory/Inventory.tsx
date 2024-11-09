@@ -1,13 +1,86 @@
 import Header from "@/components/header";
 import { trpc } from "@/util";
+import { Button, TextField } from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import { useState } from "react";
+
+// Create a separate component for the MoveToShop action
+const MoveToShopComponent = ({
+  productId,
+  currentQuantity,
+  inShopQuantity,
+}: {
+  productId: string;
+  currentQuantity: number;
+  inShopQuantity: number;
+}) => {
+  const [quantity, setQuantity] = useState<number | string>("");
+  const mutation = trpc.moveStockToShop.useMutation({
+    onSuccess: () => {
+      // Reload the page after successfully creating a product
+      window.location.reload();
+    },
+  });
+
+  const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuantity(event.target.value);
+  };
+
+  const handleMoveToShop = () => {
+    const moveQuantity = Number(quantity);
+
+    if (!moveQuantity || moveQuantity <= 0) {
+      alert("Please enter a valid quantity to move.");
+      return;
+    }
+
+    if (moveQuantity > currentQuantity - inShopQuantity) {
+      alert("Insufficient godown stock.");
+      return;
+    }
+
+    console.log(
+      `Moving ${moveQuantity} units from godown to shop for product ${productId}`
+    );
+
+    // Call the mutation to update stock
+    mutation.mutate({
+      productId: productId,
+      quantity: moveQuantity,
+    });
+    setQuantity(""); // Reset quantity after transfer
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+        paddingTop: "0.5rem",
+      }}
+    >
+      <TextField
+        size="small"
+        type="number"
+        label="Quantity"
+        value={quantity}
+        onChange={handleQuantityChange}
+        variant="outlined"
+      />
+      <Button onClick={handleMoveToShop} variant="contained" color="primary">
+        Move
+      </Button>
+    </div>
+  );
+};
 
 const columns: GridColDef[] = [
   { field: "productId", headerName: "Product ID", width: 100 },
   { field: "name", headerName: "Product Name", width: 200 },
   {
-    field: "wholsalePrice",
-    headerName: "Wholsale Price",
+    field: "wholesalePrice",
+    headerName: "Wholesale Price",
     width: 100,
     type: "number",
     valueGetter: (value, row) => `₹${row.wholesalePrice}`,
@@ -52,23 +125,38 @@ const columns: GridColDef[] = [
     valueGetter: (value, row) => `${row.currentQuantity}`,
   },
   {
-    field: "godownQuantity",
+    field: "inGodownQuantity",
     headerName: "Godown Stock Quantity",
     width: 100,
     type: "number",
-    valueGetter: (value, row) => `${row.godownQuantity}`,
+    valueGetter: (value, row) => `${row.currentQuantity - row.inShopQuantity}`,
   },
   {
-    field: "shopQuantity",
+    field: "inShopQuantity",
     headerName: "Shop Stock Quantity",
     width: 100,
     type: "number",
-    valueGetter: (value, row) => `${row.shopQuantity}`,
+    valueGetter: (value, row) => `${row.inShopQuantity}`,
+  },
+  {
+    field: "moveToShop",
+    headerName: "Actions",
+    width: 200,
+    renderCell: (params) => {
+      const { productId, currentQuantity, inShopQuantity } = params.row;
+      return (
+        <MoveToShopComponent
+          productId={productId}
+          currentQuantity={currentQuantity}
+          inShopQuantity={inShopQuantity}
+        />
+      );
+    },
   },
   {
     field: "createdAt",
     headerName: "Created At",
-    width: 100,
+    width: 150,
     type: "date",
     valueGetter: (value, row) => new Date(row.createdAt),
     valueFormatter: (value) => {
@@ -81,7 +169,7 @@ const columns: GridColDef[] = [
   {
     field: "updatedAt",
     headerName: "Updated At",
-    width: 100,
+    width: 150,
     type: "date",
     valueGetter: (value, row) => new Date(row.updatedAt),
     valueFormatter: (value) => {
@@ -123,7 +211,6 @@ const Inventory = () => {
             showQuickFilter: true,
           },
         }}
-        checkboxSelection
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />
     </div>

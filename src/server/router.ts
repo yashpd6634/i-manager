@@ -311,6 +311,96 @@ export const appRouter = t.router({
         }
       }
     ),
+  moveStockToShop: t.procedure
+    .input(
+      z.object({
+        productId: z.string(),
+        quantity: z.number().min(1, "Quantity must be at least 1"), // Ensure quantity is positive
+      })
+    )
+    .mutation(async ({ input: { productId, quantity } }) => {
+      try {
+        // Fetch the current stock of the product
+        const product = await prisma.product.findUnique({
+          where: { productId },
+        });
+
+        // Check if the product exists
+        if (!product) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Product not found",
+          });
+        }
+
+        // Check if there is enough stock in the godown
+        if (product.currentQuantity - product.inShopQuantity < quantity) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Not enough stock in godown to move",
+          });
+        }
+
+        // Perform the stock movement: update godown and shop quantities
+        const updatedProduct = await prisma.product.update({
+          where: { productId },
+          data: {
+            inShopQuantity: {
+              increment: quantity, // Increase stock in shop
+            },
+          },
+        });
+
+        return updatedProduct;
+      } catch (error) {
+        console.error("Error moving stock:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to move stock",
+        });
+      }
+    }),
+  addMoneyToBalance: t.procedure
+    .input(
+      z.object({
+        merchantId: z.string(),
+        amount: z.number(),
+      })
+    )
+    .mutation(async ({ input: { merchantId, amount } }) => {
+      try {
+        // Fetch the current stock of the product
+        const merchant = await prisma.merchant.findUnique({
+          where: { merchantId },
+        });
+
+        // Check if the product exists
+        if (!merchant) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Merchant not found",
+          });
+        }
+
+        // Perform the stock movement: update godown and shop quantities
+        const updatedMerchnt = await prisma.merchant.update({
+          where: { merchantId },
+          data: {
+            balance: {
+              increment: amount, // Increase stock in shop
+            },
+          },
+        });
+
+        return updatedMerchnt;
+      } catch (error) {
+        console.error("Error adding money to balance:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to add money",
+        });
+      }
+    }),
 });
 
 export type AppRouter = typeof appRouter;

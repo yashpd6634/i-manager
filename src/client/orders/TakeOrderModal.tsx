@@ -14,6 +14,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Select,
 } from "@mui/material";
 import { CircleX } from "lucide-react";
 
@@ -64,6 +65,7 @@ const TakeOrderModal = ({
     totalBill: 0,
     totalPaid: 0,
   });
+  const [warnings, setWarnings] = useState<{ [key: string]: string }>({});
 
   const { data: merchantData, isLoading: isMerchantsLoading } =
     trpc.getMerchants.useQuery();
@@ -95,14 +97,30 @@ const TakeOrderModal = ({
 
   const handleProductChange = (index: number, field: string, value: string) => {
     const newProducts = [...formData.products];
+    const quantity = parseFloat(value);
+
     newProducts[index] = {
       ...newProducts[index],
-      [field]: parseFloat(value),
+      [field]: quantity,
     };
-    setFormData({
-      ...formData,
-      products: newProducts,
-    });
+
+    // Check if quantity exceeds available quantity and set warnings
+    if (
+      field === "quantity" &&
+      quantity > newProducts[index].availableQuantity
+    ) {
+      setWarnings((prev) => ({
+        ...prev,
+        [newProducts[index].productId]: "Quantity exceeds available stock!",
+      }));
+    } else {
+      setWarnings((prev) => {
+        const { [newProducts[index].productId]: _, ...rest } = prev;
+        return rest;
+      });
+    }
+
+    setFormData({ ...formData, products: newProducts });
     updateTotalBill(newProducts);
   };
 
@@ -216,6 +234,12 @@ const TakeOrderModal = ({
                         required
                         fullWidth
                       />
+                      {/* Display warning if quantity exceeds available stock */}
+                      {warnings[product.productId] && (
+                        <div className="text-red-500 text-sm">
+                          {warnings[product.productId]}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <TextField
@@ -238,7 +262,9 @@ const TakeOrderModal = ({
                     <TableCell>
                       ₹{product.retailPrice * product.quantity}
                     </TableCell>
-                    <TableCell>{product.availableQuantity}</TableCell>
+                    <TableCell>
+                      {product.availableQuantity} <Select></Select>
+                    </TableCell>
                     <TableCell>
                       <Button
                         variant="text"
@@ -281,6 +307,7 @@ const TakeOrderModal = ({
           <div className="mt-4 flex">
             <button
               type="submit"
+              disabled={Object.keys(warnings).length !== 0}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
             >
               Take Order

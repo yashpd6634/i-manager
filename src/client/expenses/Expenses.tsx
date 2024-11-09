@@ -158,6 +158,7 @@ const Expenses = () => {
                 outerRadius={150}
                 fill="#8884d8"
                 dataKey="amount"
+                nameKey="category"
                 onMouseEnter={(_, index) => setActiveIndex(index)}
               >
                 {aggregatedData.map((entry, index) => (
@@ -170,7 +171,13 @@ const Expenses = () => {
                 ))}
               </Pie>
               <Tooltip />
-              <Legend />
+              <Legend
+                verticalAlign="top"
+                align="center"
+                iconType="circle"
+                wrapperStyle={{ paddingTop: "20px" }}
+                layout="horizontal"
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
