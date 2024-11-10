@@ -81,7 +81,13 @@ const columns: GridColDef[] = [
   { field: "name", headerName: "Name", width: 200 },
   { field: "phoneNumber", headerName: "Phone Number", width: 100 },
   { field: "location", headerName: "Location", width: 200 },
-  { field: "balance", headerName: "Balance", width: 200 },
+  {
+    field: "balance",
+    headerName: "Balance",
+    width: 200,
+    type: "number",
+    valueGetter: (value, row) => `₹${row.balance}`,
+  },
   {
     field: "addMoney",
     headerName: "Actions",

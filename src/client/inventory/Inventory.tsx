@@ -1,7 +1,19 @@
 import Header from "@/components/header";
 import { trpc } from "@/util";
-import { Button, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import dayjs from "dayjs";
+import { DateRangePicker } from "react-date-range";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 import { useState } from "react";
 
 // Create a separate component for the MoveToShop action
@@ -140,7 +152,7 @@ const columns: GridColDef[] = [
   },
   {
     field: "moveToShop",
-    headerName: "Actions",
+    headerName: "Move to shop",
     width: 200,
     renderCell: (params) => {
       const { productId, currentQuantity, inShopQuantity } = params.row;
@@ -183,7 +195,31 @@ const columns: GridColDef[] = [
 
 const Inventory = () => {
   const { data, error, isLoading } = trpc.getProducts.useQuery();
-  console.log(data?.products);
+  const [dateRange, setDateRange] = useState([
+    { startDate: undefined, endDate: undefined, key: "selection" },
+  ]);
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleDateRangeChange = (ranges: any) => {
+    setDateRange([ranges.selection]);
+  };
+
+  const handleResetFilter = () => {
+    setDateRange([
+      { startDate: undefined, endDate: undefined, key: "selection" },
+    ]);
+  };
+
+  const filteredProducts = data?.products.filter((product) => {
+    const expiryDate = dayjs(product.expiryDate);
+    const startDate = dateRange[0].startDate;
+    const endDate = dateRange[0].endDate;
+
+    return (
+      (!startDate || expiryDate.isAfter(startDate)) &&
+      (!endDate || expiryDate.isBefore(endDate))
+    );
+  });
 
   if (isLoading) {
     return <div className="py-4">Loading...</div>;
@@ -200,12 +236,48 @@ const Inventory = () => {
   return (
     <div className="flex flex-col">
       <Header name="Inventory" />
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Popup Title</DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+            <DateRangePicker
+              ranges={dateRange}
+              onChange={handleDateRangeChange}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       <DataGrid
         disableColumnSelector
-        rows={data.products}
+        rows={filteredProducts}
         columns={columns}
         getRowId={(row) => row.productId}
-        slots={{ toolbar: GridToolbar }}
+        slots={{
+          toolbar: () => (
+            <Box display="flex" gap={2} alignItems="center" padding={1}>
+              <GridToolbar />
+              <Button
+                onClick={() => setOpenDialog(true)}
+                variant="contained"
+                color="primary"
+              >
+                Show Expiry Date Filter
+              </Button>
+              <Button
+                onClick={handleResetFilter}
+                color="secondary"
+                variant="outlined"
+              >
+                Reset Expiry Date Filter
+              </Button>
+            </Box>
+          ),
+        }}
         slotProps={{
           toolbar: {
             showQuickFilter: true,

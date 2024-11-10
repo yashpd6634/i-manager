@@ -12,6 +12,16 @@ import {
   Tooltip,
 } from "recharts";
 import AddExpenseModal from "./AddExpenseModal";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
+import { DateRangePicker } from "react-date-range";
+import dayjs from "dayjs";
 
 // Define the ExpenseFormData type directly here
 type ExpenseFormData = {
@@ -22,10 +32,38 @@ type ExpenseFormData = {
 };
 
 const columns: GridColDef[] = [
-  { field: "category", headerName: "Category", width: 200 },
-  { field: "amount", headerName: "Amount", width: 200 },
-  { field: "expendDate", headerName: "Expense Date", width: 200 },
-  { field: "description", headerName: "Description", width: 250 },
+  {
+    field: "category",
+    headerName: "Category",
+    width: 200,
+    type: "string",
+  },
+  {
+    field: "amount",
+    headerName: "Amount",
+    width: 200,
+    type: "number",
+    valueGetter: (value, row) => `₹${row.amount}`,
+  },
+  {
+    field: "expendDate",
+    headerName: "Expense Date",
+    width: 200,
+    type: "date",
+    valueGetter: (value, row) => new Date(row.expendDate),
+    valueFormatter: (value) => {
+      const date = value as Date;
+      return date
+        ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+        : "";
+    },
+  },
+  {
+    field: "description",
+    headerName: "Description",
+    width: 250,
+    type: "string",
+  },
 ];
 
 const Expenses = () => {
@@ -34,6 +72,10 @@ const Expenses = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [dateRange, setDateRange] = useState([
+    { startDate: undefined, endDate: undefined, key: "selection" },
+  ]);
+  const [openDialog, setOpenDialog] = useState(false);
 
   const { data, isLoading, isError } = trpc.getExpenses.useQuery();
   const mutation = trpc.addExpense.useMutation({
@@ -41,6 +83,27 @@ const Expenses = () => {
       // Reload the page after successfully adding an expense
       window.location.reload();
     },
+  });
+
+  const handleDateRangeChange = (ranges: any) => {
+    setDateRange([ranges.selection]);
+  };
+
+  const handleResetFilter = () => {
+    setDateRange([
+      { startDate: undefined, endDate: undefined, key: "selection" },
+    ]);
+  };
+
+  const filteredProducts = data?.expenses.filter((expense) => {
+    const expiryDate = dayjs(expense.expendDate);
+    const startDate = dateRange[0].startDate;
+    const endDate = dateRange[0].endDate;
+
+    return (
+      (!startDate || expiryDate.isAfter(startDate)) &&
+      (!endDate || expiryDate.isBefore(endDate))
+    );
   });
 
   const handleAddExpense = (expenseData: ExpenseFormData) => {
@@ -190,12 +253,53 @@ const Expenses = () => {
       {/* Expenses Table */}
       <div className="mt-6 bg-white shadow rounded-lg overflow-hidden">
         <h3 className="text-lg font-semibold px-6 py-4">Expense Details</h3>
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+          <DialogTitle>Popup Title</DialogTitle>
+          <DialogContent>
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              mb={2}
+            >
+              <DateRangePicker
+                ranges={dateRange}
+                onChange={handleDateRangeChange}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDialog(false)} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
         <DataGrid
           disableColumnSelector
           rows={filteredExpenses}
           columns={columns}
           getRowId={(row) => row.expenseId} // Assuming each expense has an expenseId
-          slots={{ toolbar: GridToolbar }}
+          slots={{
+            toolbar: () => (
+              <Box display="flex" gap={2} alignItems="center" padding={1}>
+                <GridToolbar />
+                <Button
+                  onClick={() => setOpenDialog(true)}
+                  variant="contained"
+                  color="primary"
+                >
+                  Show Order Date Filter
+                </Button>
+                <Button
+                  onClick={handleResetFilter}
+                  color="secondary"
+                  variant="outlined"
+                >
+                  Reset Order Date Filter
+                </Button>
+              </Box>
+            ),
+          }}
           slotProps={{
             toolbar: {
               showQuickFilter: true,

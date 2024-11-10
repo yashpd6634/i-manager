@@ -92,7 +92,7 @@ const Products = () => {
             >
               <div className="flex flex-col items-center">
                 <img
-                  src="../assets/black-suit.jpg"
+                  src="../assets/PM_TradeWorld_Flex.jpeg"
                   alt={product.name}
                   width={150}
                   height={150}
@@ -102,10 +102,10 @@ const Products = () => {
                   {product.name}
                 </h3>
                 <p className="text-gray-800">
-                  Wholsale Price: ${product.wholesalePrice.toFixed(2)}
+                  Wholsale Price: ₹{product.wholesalePrice.toFixed(2)}
                 </p>
                 <p className="text-gray-800">
-                  Retail Price: ${product.retailPrice.toFixed(2)}
+                  Retail Price: ₹{product.retailPrice.toFixed(2)}
                 </p>
                 <div className="text-sm text-gray-600 mt-1">
                   Stock: {product.currentQuantity}

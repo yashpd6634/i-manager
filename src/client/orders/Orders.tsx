@@ -27,8 +27,20 @@ const columns: GridColDef[] = [
         : "";
     },
   },
-  { field: "totalBill", headerName: "Total Bill", width: 100, type: "number" },
-  { field: "totalPaid", headerName: "Total Paid", width: 100, type: "number" },
+  {
+    field: "totalBill",
+    headerName: "Total Bill",
+    width: 100,
+    type: "number",
+    valueGetter: (value, row) => `₹${row.totalBill}`,
+  },
+  {
+    field: "totalPaid",
+    headerName: "Total Paid",
+    width: 100,
+    type: "number",
+    valueGetter: (value, row) => `₹${row.totalPaid}`,
+  },
 ];
 
 type OrderFormData = {
