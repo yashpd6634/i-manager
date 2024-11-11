@@ -4,7 +4,7 @@ import { httpBatchLink, loggerLink } from "@trpc/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { IpcRequest } from "../api";
 import superjson from "superjson";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "@/dashboard/Dashboard";
 import Wrapper from "./wrapper";
 import Inventory from "./inventory/Inventory";
