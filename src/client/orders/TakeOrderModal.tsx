@@ -85,6 +85,20 @@ const TakeOrderModal = ({
   };
 
   const handleAddProduct = (product: any) => {
+    // Check if the product already exists in the formData
+    const existingProduct = formData.products.find(
+      (p) => p.productId === product.productId
+    );
+
+    if (existingProduct) {
+      // Set a warning for duplicate product
+      setWarnings((prev) => ({
+        ...prev,
+        [product.productId]: "Product is already added to the order.",
+      }));
+      return; // Exit the function to avoid adding the duplicate product
+    }
+
     const godownQuantity = product.currentQuantity - product.inShopQuantity;
     const newProduct = {
       productId: product.productId,
@@ -96,10 +110,17 @@ const TakeOrderModal = ({
       availableQuantity: godownQuantity,
       stockSource: "Godown" as const,
     };
+
     setFormData((prev) => ({
       ...prev,
       products: [...prev.products, newProduct],
     }));
+
+    // Clear any warnings for this product as it’s added successfully
+    setWarnings((prev) => {
+      const { [product.productId]: _, ...rest } = prev;
+      return rest;
+    });
   };
 
   const handleSourceChange = (
@@ -265,6 +286,11 @@ const TakeOrderModal = ({
                       {warnings[product.productId] && (
                         <div className="text-red-500 text-sm">
                           {warnings[product.productId]}
+                        </div>
+                      )}
+                      {warnings.duplicateProduct && (
+                        <div className="text-red-500 text-sm mt-2">
+                          {warnings.duplicateProduct}
                         </div>
                       )}
                     </TableCell>

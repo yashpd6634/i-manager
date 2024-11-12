@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import CreateProductModal from "./CreateProductModal";
 import { trpc } from "@/util";
 import Header from "@/components/header";
+import dayjs from "dayjs";
 
 type ProductFormData = {
   productId: string;
@@ -35,6 +36,13 @@ const Products = () => {
       retailPrice: parseFloat(parseFloat(productData.retailPrice).toFixed(2)),
     });
   };
+
+  const products = data?.products.filter((product) => {
+    const expiryDate = dayjs(product.expiryDate);
+    const today = dayjs();
+
+    return expiryDate.isAfter(today, "day") && product.currentQuantity !== 0;
+  });
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -85,7 +93,7 @@ const Products = () => {
         {false ? (
           <div>Loading...</div>
         ) : (
-          data.products?.map((product) => (
+          products?.map((product) => (
             <div
               key={product.productId}
               className="border shadow rounded-md p-4 max-w-full w-full mx-auto"

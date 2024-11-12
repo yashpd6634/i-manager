@@ -133,6 +133,28 @@ const columns: GridColDef[] = [
     },
   },
   {
+    field: "daysUntilExpiry",
+    headerName: "Days Until Expiry",
+    width: 120,
+    type: "number",
+    valueGetter: (value, row) => {
+      const expiryDate = row.expiryDate ? new Date(row.expiryDate) : null;
+      if (!expiryDate) return null;
+
+      const currentDate = new Date();
+      const diffInMilliseconds = expiryDate.getTime() - currentDate.getTime();
+      const daysUntilExpiry = Math.ceil(
+        diffInMilliseconds / (1000 * 60 * 60 * 24)
+      );
+
+      return daysUntilExpiry >= 0 ? daysUntilExpiry : 0; // Show 0 if the product is expired
+    },
+    valueFormatter: (value) => {
+      const days = value as number;
+      return `${days} days left`;
+    },
+  },
+  {
     field: "soldQuantity",
     headerName: "Sold Quantity",
     width: 100,
@@ -228,11 +250,21 @@ const Inventory = () => {
     const expiryDate = dayjs(product.expiryDate);
     const startDate = dateRange[0].startDate;
     const endDate = dateRange[0].endDate;
+    const today = dayjs();
 
     return (
       (!startDate || expiryDate.isSameOrAfter(startDate, "day")) &&
-      (!endDate || expiryDate.isSameOrBefore(endDate, "day"))
+      (!endDate || expiryDate.isSameOrBefore(endDate, "day")) &&
+      expiryDate.isAfter(today, "day") &&
+      product.currentQuantity !== 0
     );
+  });
+
+  const expiredProducts = data?.products.filter((product) => {
+    const expiryDate = dayjs(product.expiryDate);
+    const today = dayjs(); // Current date
+
+    return expiryDate.isBefore(today, "day"); // Only include products that expired before today
   });
 
   if (isLoading) {
@@ -300,6 +332,24 @@ const Inventory = () => {
         }}
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />
+      <div className="mt-4">
+        <Header name="Expired Products" />
+        <DataGrid
+          disableColumnSelector
+          rows={expiredProducts}
+          columns={columns}
+          getRowId={(row) => row.productId}
+          slots={{
+            toolbar: GridToolbar,
+          }}
+          slotProps={{
+            toolbar: {
+              showQuickFilter: true,
+            },
+          }}
+          className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
+        />
+      </div>
     </div>
   );
 };
