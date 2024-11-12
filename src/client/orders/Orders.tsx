@@ -1,6 +1,13 @@
 import Header from "@/components/header";
 import { trpc } from "@/util";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  gridFilteredSortedRowIdsSelector,
+  GridToolbar,
+  GridToolbarQuickFilter,
+  useGridApiRef,
+} from "@mui/x-data-grid";
 import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import TakeOrderModal from "./TakeOrderModal";
@@ -14,6 +21,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { DateRangePicker } from "react-date-range";
+import { GridApiCommunity } from "@mui/x-data-grid/internals";
 
 const columns: GridColDef[] = [
   { field: "orderId", headerName: "Order ID", width: 100 },
@@ -69,11 +77,13 @@ type OrderFormData = {
 
 const Orders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [dateRange, setDateRange] = useState([
     { startDate: undefined, endDate: undefined, key: "selection" },
   ]);
   const [openFilter, setOpenFilter] = useState(false);
+  const [totalBill, setTotalBill] = useState(0);
+  const [totalPaid, setTotalPaid] = useState(0);
+  const apiRef = useGridApiRef();
 
   const { data, error, isLoading } = trpc.getOrders.useQuery(); // Assuming you have a query that fetches orders with merchant data
 
@@ -94,6 +104,36 @@ const Orders = () => {
       (!endDate || orderDate.isSameOrBefore(endDate, "day"))
     );
   });
+
+  const calculateExpenses = (
+    apiRef: React.MutableRefObject<GridApiCommunity>
+  ) => {
+    if (
+      apiRef.current == null ||
+      typeof apiRef.current.getAllRowIds !== "function"
+    ) {
+      return;
+    }
+
+    const visibleRowIds = gridFilteredSortedRowIdsSelector(apiRef);
+    let totalBill = 0;
+    let totalPaid = 0;
+    const categoryAmounts: Record<
+      string,
+      { category: string; amount: number }
+    > = {};
+
+    visibleRowIds.forEach((rowId) => {
+      const row = apiRef.current.getRow(rowId);
+      if (row) {
+        totalBill += row.totalBill;
+        totalPaid += row.totalPaid;
+      }
+    });
+
+    setTotalBill(totalBill);
+    setTotalPaid(totalPaid);
+  };
 
   const handleTakeOrder = (orderData: OrderFormData) => {
     mutation.mutate(orderData);
@@ -132,6 +172,10 @@ const Orders = () => {
           <PlusCircleIcon className="w-5 h-5 mr-2 !text-gray-200" /> Take Order
         </button>
       </div>
+      <div className="flex mt-4 text-xl font-bold">
+        <h4 className="text-cyan-600">Total Bill: ₹{totalBill} | </h4>
+        <h4 className="text-lime-600">Total Paid: ₹{totalPaid}</h4>
+      </div>
       <Dialog open={openFilter} onClose={() => setOpenFilter(false)}>
         <DialogTitle>Popup Title</DialogTitle>
         <DialogContent>
@@ -150,12 +194,14 @@ const Orders = () => {
       </Dialog>
       <DataGrid
         disableColumnSelector
+        apiRef={apiRef}
         rows={rows}
         columns={columns}
         getRowId={(row) => row.orderId}
         slots={{
           toolbar: () => (
             <Box display="flex" gap={2} alignItems="center" padding={1}>
+              <GridToolbarQuickFilter />
               <GridToolbar />
               <Button
                 onClick={() => setOpenFilter(true)}
@@ -178,6 +224,15 @@ const Orders = () => {
                 variant="outlined"
               >
                 Reset Order Date Filter
+              </Button>
+              <Button
+                onClick={() => {
+                  calculateExpenses(apiRef);
+                }}
+                variant="contained"
+                color="warning"
+              >
+                Calculate Bills
               </Button>
             </Box>
           ),

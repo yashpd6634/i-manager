@@ -1,7 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/header";
 import { trpc } from "@/util";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  gridFilteredSortedRowIdsSelector,
+  GridToolbar,
+  GridToolbarQuickFilter,
+  useGridApiRef,
+} from "@mui/x-data-grid";
 import { PlusCircleIcon } from "lucide-react";
 import {
   Cell,
@@ -24,6 +31,7 @@ import { DateRangePicker } from "react-date-range";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import { GridApiCommunity } from "@mui/x-data-grid/internals";
 
 // Define the ExpenseFormData type directly here
 type ExpenseFormData = {
@@ -74,6 +82,10 @@ const Expenses = () => {
     { startDate: Date | undefined; endDate: Date | undefined; key: string }[]
   >([{ startDate: undefined, endDate: undefined, key: "selection" }]);
   const [openFilter, setOpenFilter] = useState(false);
+  const [expenseByCategory, setExpenseByCategory] = useState<
+    Record<string, { category: string; amount: number }>
+  >({});
+  const apiRef = useGridApiRef();
 
   dayjs.extend(isSameOrAfter);
   dayjs.extend(isSameOrBefore);
@@ -85,6 +97,8 @@ const Expenses = () => {
       window.location.reload();
     },
   });
+
+  const [totalExpenses, setTotalExpenses] = useState(data?.totalExpenses ?? 0);
 
   const filteredProducts = data?.expenses.filter((expense) => {
     const expendDate = dayjs(expense.expendDate);
@@ -103,15 +117,6 @@ const Expenses = () => {
       amount: parseFloat(parseFloat(expenseData.amount).toFixed(2)),
     });
   };
-
-  // Aggregate data by category and calculate total expenses
-  const expenseByCategory = filteredProducts?.reduce((acc, expense) => {
-    if (!acc[expense.category]) {
-      acc[expense.category] = { category: expense.category, amount: 0 };
-    }
-    acc[expense.category].amount += expense.amount;
-    return acc;
-  }, {} as Record<string, { category: string; amount: number }>);
 
   // Create a unique color for each category
   const colorPalette = [
@@ -134,8 +139,39 @@ const Expenses = () => {
     })
   );
 
+  const calculateExpenses = (
+    apiRef: React.MutableRefObject<GridApiCommunity>
+  ) => {
+    if (
+      apiRef.current == null ||
+      typeof apiRef.current.getAllRowIds !== "function"
+    ) {
+      return;
+    }
+
+    const visibleRowIds = gridFilteredSortedRowIdsSelector(apiRef);
+    let totalAmount = 0;
+    const categoryAmounts: Record<
+      string,
+      { category: string; amount: number }
+    > = {};
+
+    visibleRowIds.forEach((rowId) => {
+      const row = apiRef.current.getRow(rowId);
+      if (row) {
+        totalAmount += row.amount;
+        if (!categoryAmounts[row.category]) {
+          categoryAmounts[row.category] = { category: row.category, amount: 0 };
+        }
+        categoryAmounts[row.category].amount += row.amount;
+      }
+    });
+
+    setTotalExpenses(totalAmount);
+    setExpenseByCategory(categoryAmounts);
+  };
+
   const aggregatedData = useMemo(() => categoryData ?? [], [categoryData]);
-  const totalExpenses = data?.totalExpenses ?? 0;
 
   const classNames = {
     label: "block text-sm font-medium text-gray-700",
@@ -313,11 +349,13 @@ const Expenses = () => {
         <DataGrid
           disableColumnSelector
           rows={filteredProducts}
+          apiRef={apiRef}
           columns={columns}
           getRowId={(row) => row.expenseId} // Assuming each expense has an expenseId
           slots={{
             toolbar: () => (
               <Box display="flex" gap={2} alignItems="center" padding={1}>
+                <GridToolbarQuickFilter />
                 <GridToolbar />
                 <Button
                   onClick={() => setOpenFilter(true)}
@@ -340,6 +378,15 @@ const Expenses = () => {
                   variant="outlined"
                 >
                   Reset Expense Date Filter
+                </Button>
+                <Button
+                  onClick={() => {
+                    calculateExpenses(apiRef);
+                  }}
+                  variant="contained"
+                  color="warning"
+                >
+                  Calculate Expenses
                 </Button>
               </Box>
             ),

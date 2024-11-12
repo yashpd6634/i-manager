@@ -9,7 +9,12 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridToolbar,
+  GridToolbarQuickFilter,
+} from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import { DateRangePicker } from "react-date-range";
 import "react-date-range/dist/styles.css";
@@ -269,6 +274,7 @@ const Inventory = () => {
         slots={{
           toolbar: () => (
             <Box display="flex" gap={2} alignItems="center" padding={1}>
+              <GridToolbarQuickFilter />
               <GridToolbar />
               <Button
                 onClick={() => setOpenDialog(true)}
