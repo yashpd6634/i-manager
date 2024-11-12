@@ -22,6 +22,8 @@ import {
 } from "@mui/material";
 import { DateRangePicker } from "react-date-range";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
 // Define the ExpenseFormData type directly here
 type ExpenseFormData = {
@@ -53,9 +55,7 @@ const columns: GridColDef[] = [
     valueGetter: (value, row) => new Date(row.expendDate),
     valueFormatter: (value) => {
       const date = value as Date;
-      return date
-        ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
-        : "";
+      return date ? `${dayjs(date).format("DD/MM/YYYY")}` : "";
     },
   },
   {
@@ -70,12 +70,13 @@ const Expenses = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [dateRange, setDateRange] = useState([
-    { startDate: undefined, endDate: undefined, key: "selection" },
-  ]);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [dateRange, setDateRange] = useState<
+    { startDate: Date | undefined; endDate: Date | undefined; key: string }[]
+  >([{ startDate: undefined, endDate: undefined, key: "selection" }]);
+  const [openFilter, setOpenFilter] = useState(false);
+
+  dayjs.extend(isSameOrAfter);
+  dayjs.extend(isSameOrBefore);
 
   const { data, isLoading, isError } = trpc.getExpenses.useQuery();
   const mutation = trpc.addExpense.useMutation({
@@ -85,24 +86,14 @@ const Expenses = () => {
     },
   });
 
-  const handleDateRangeChange = (ranges: any) => {
-    setDateRange([ranges.selection]);
-  };
-
-  const handleResetFilter = () => {
-    setDateRange([
-      { startDate: undefined, endDate: undefined, key: "selection" },
-    ]);
-  };
-
   const filteredProducts = data?.expenses.filter((expense) => {
-    const expiryDate = dayjs(expense.expendDate);
+    const expendDate = dayjs(expense.expendDate);
     const startDate = dateRange[0].startDate;
     const endDate = dateRange[0].endDate;
 
     return (
-      (!startDate || expiryDate.isAfter(startDate)) &&
-      (!endDate || expiryDate.isBefore(endDate))
+      (!startDate || expendDate.isSameOrAfter(startDate, "day")) &&
+      (!endDate || expendDate.isSameOrBefore(endDate, "day"))
     );
   });
 
@@ -113,21 +104,38 @@ const Expenses = () => {
     });
   };
 
-  const expenses = useMemo(() => data?.expenses ?? [], [data]);
-  const aggregatedData = useMemo(() => data?.expenseByCategory ?? [], [data]);
-  const totalExpenses = data?.totalExpenses ?? 0;
+  // Aggregate data by category and calculate total expenses
+  const expenseByCategory = filteredProducts?.reduce((acc, expense) => {
+    if (!acc[expense.category]) {
+      acc[expense.category] = { category: expense.category, amount: 0 };
+    }
+    acc[expense.category].amount += expense.amount;
+    return acc;
+  }, {} as Record<string, { category: string; amount: number }>);
 
-  const filteredExpenses = useMemo(() => {
-    return expenses.filter((expense) => {
-      const expenseDate = new Date(expense.expendDate);
-      const matchesCategory =
-        selectedCategory === "All" || expense.category === selectedCategory;
-      const matchesDate =
-        (!startDate || new Date(startDate) <= expenseDate) &&
-        (!endDate || new Date(endDate) >= expenseDate);
-      return matchesCategory && matchesDate;
-    });
-  }, [expenses, selectedCategory, startDate, endDate]);
+  // Create a unique color for each category
+  const colorPalette = [
+    "#FF6347",
+    "#4682B4",
+    "#32CD32",
+    "#FFD700",
+    "#8A2BE2",
+    "#D2691E",
+    "#FF1493",
+    "#00BFFF",
+    "#8B0000",
+    "#A52A2A",
+  ];
+
+  const categoryData = Object.values(expenseByCategory ?? {}).map(
+    (item, index) => ({
+      ...item,
+      color: colorPalette[index % colorPalette.length], // Cycle through colors
+    })
+  );
+
+  const aggregatedData = useMemo(() => categoryData ?? [], [categoryData]);
+  const totalExpenses = data?.totalExpenses ?? 0;
 
   const classNames = {
     label: "block text-sm font-medium text-gray-700",
@@ -191,7 +199,21 @@ const Expenses = () => {
                 id="start-date"
                 name="start-date"
                 className={classNames.selectInput}
-                onChange={(e) => setStartDate(e.target.value)}
+                value={
+                  dateRange[0].startDate
+                    ? dateRange[0].startDate.toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  setDateRange((prevRange) => [
+                    {
+                      ...prevRange[0],
+                      startDate: e.target.value
+                        ? new Date(e.target.value)
+                        : undefined,
+                    },
+                  ])
+                }
               />
             </div>
             {/* END DATE */}
@@ -204,7 +226,21 @@ const Expenses = () => {
                 id="end-date"
                 name="end-date"
                 className={classNames.selectInput}
-                onChange={(e) => setEndDate(e.target.value)}
+                value={
+                  dateRange[0].endDate
+                    ? dateRange[0].endDate.toISOString().split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  setDateRange((prevRange) => [
+                    {
+                      ...prevRange[0],
+                      endDate: e.target.value
+                        ? new Date(e.target.value)
+                        : undefined,
+                    },
+                  ])
+                }
               />
             </div>
           </div>
@@ -247,13 +283,13 @@ const Expenses = () => {
       </div>
 
       <div className="mt-4 text-xl font-bold text-red-500">
-        <h4>Total Expense: ₹{totalExpenses}</h4>
+        <h4>Total Expenses: ₹{totalExpenses}</h4>
       </div>
 
       {/* Expenses Table */}
       <div className="mt-6 bg-white shadow rounded-lg overflow-hidden">
         <h3 className="text-lg font-semibold px-6 py-4">Expense Details</h3>
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <Dialog open={openFilter} onClose={() => setOpenFilter(false)}>
           <DialogTitle>Popup Title</DialogTitle>
           <DialogContent>
             <Box
@@ -264,19 +300,19 @@ const Expenses = () => {
             >
               <DateRangePicker
                 ranges={dateRange}
-                onChange={handleDateRangeChange}
+                onChange={(ranges: any) => setDateRange([ranges.selection])}
               />
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDialog(false)} color="primary">
+            <Button onClick={() => setOpenFilter(false)} color="primary">
               Close
             </Button>
           </DialogActions>
         </Dialog>
         <DataGrid
           disableColumnSelector
-          rows={filteredExpenses}
+          rows={filteredProducts}
           columns={columns}
           getRowId={(row) => row.expenseId} // Assuming each expense has an expenseId
           slots={{
@@ -284,18 +320,26 @@ const Expenses = () => {
               <Box display="flex" gap={2} alignItems="center" padding={1}>
                 <GridToolbar />
                 <Button
-                  onClick={() => setOpenDialog(true)}
+                  onClick={() => setOpenFilter(true)}
                   variant="contained"
                   color="primary"
                 >
-                  Show Order Date Filter
+                  Show Expense Date Filter
                 </Button>
                 <Button
-                  onClick={handleResetFilter}
+                  onClick={() =>
+                    setDateRange([
+                      {
+                        startDate: undefined,
+                        endDate: undefined,
+                        key: "selection",
+                      },
+                    ])
+                  }
                   color="secondary"
                   variant="outlined"
                 >
-                  Reset Order Date Filter
+                  Reset Expense Date Filter
                 </Button>
               </Box>
             ),

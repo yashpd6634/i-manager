@@ -15,6 +15,8 @@ import { DateRangePicker } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { useState } from "react";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
 // Create a separate component for the MoveToShop action
 const MoveToShopComponent = ({
@@ -120,6 +122,10 @@ const columns: GridColDef[] = [
       const date = row.expiryDate;
       return date ? new Date(date) : null;
     },
+    valueFormatter: (value) => {
+      const date = value;
+      return date ? dayjs(date).format("DD/MM/YYYY") : ""; // Formats the date
+    },
   },
   {
     field: "soldQuantity",
@@ -174,7 +180,7 @@ const columns: GridColDef[] = [
     valueFormatter: (value) => {
       const date = value as Date;
       return date
-        ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+        ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
         : ""; // Format the date and time
     },
   },
@@ -187,7 +193,7 @@ const columns: GridColDef[] = [
     valueFormatter: (value) => {
       const date = value as Date;
       return date
-        ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+        ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
         : ""; // Format the date and time
     },
   },
@@ -199,6 +205,9 @@ const Inventory = () => {
     { startDate: undefined, endDate: undefined, key: "selection" },
   ]);
   const [openDialog, setOpenDialog] = useState(false);
+
+  dayjs.extend(isSameOrAfter);
+  dayjs.extend(isSameOrBefore);
 
   const handleDateRangeChange = (ranges: any) => {
     setDateRange([ranges.selection]);
@@ -216,8 +225,8 @@ const Inventory = () => {
     const endDate = dateRange[0].endDate;
 
     return (
-      (!startDate || expiryDate.isAfter(startDate)) &&
-      (!endDate || expiryDate.isBefore(endDate))
+      (!startDate || expiryDate.isSameOrAfter(startDate, "day")) &&
+      (!endDate || expiryDate.isSameOrBefore(endDate, "day"))
     );
   });
 

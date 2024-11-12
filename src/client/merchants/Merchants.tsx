@@ -5,6 +5,7 @@ import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import AddMerchantModal from "./AddMerchantModal";
+import dayjs from "dayjs";
 
 const AddMoney = ({
   merchantId,
@@ -106,6 +107,19 @@ const columns: GridColDef[] = [
     },
   },
   {
+    field: "createdAt",
+    headerName: "Created At",
+    width: 150,
+    type: "date",
+    valueGetter: (value, row) => new Date(row.createdAt),
+    valueFormatter: (value) => {
+      const date = value as Date;
+      return date
+        ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
+        : ""; // Format the date and time
+    },
+  },
+  {
     field: "updatedAt",
     headerName: "Updated At",
     width: 150,
@@ -114,7 +128,7 @@ const columns: GridColDef[] = [
     valueFormatter: (value) => {
       const date = value as Date;
       return date
-        ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+        ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
         : ""; // Format the date and time
     },
   },

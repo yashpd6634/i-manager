@@ -4,6 +4,16 @@ import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import TakeOrderModal from "./TakeOrderModal";
+import dayjs from "dayjs";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
+import { DateRangePicker } from "react-date-range";
 
 const columns: GridColDef[] = [
   { field: "orderId", headerName: "Order ID", width: 100 },
@@ -23,7 +33,7 @@ const columns: GridColDef[] = [
     valueFormatter: (value) => {
       const date = value as Date;
       return date
-        ? `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+        ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
         : "";
     },
   },
@@ -60,6 +70,11 @@ type OrderFormData = {
 const Orders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [dateRange, setDateRange] = useState([
+    { startDate: undefined, endDate: undefined, key: "selection" },
+  ]);
+  const [openFilter, setOpenFilter] = useState(false);
+
   const { data, error, isLoading } = trpc.getOrders.useQuery(); // Assuming you have a query that fetches orders with merchant data
 
   const mutation = trpc.takeOrder.useMutation({
@@ -67,6 +82,17 @@ const Orders = () => {
       // Reload the page after successfully creating a product
       window.location.reload();
     },
+  });
+
+  const filteredProducts = data?.orders.filter((order) => {
+    const orderDate = dayjs(order.orderDate);
+    const startDate = dateRange[0].startDate;
+    const endDate = dateRange[0].endDate;
+
+    return (
+      (!startDate || orderDate.isSameOrAfter(startDate, "day")) &&
+      (!endDate || orderDate.isSameOrBefore(endDate, "day"))
+    );
   });
 
   const handleTakeOrder = (orderData: OrderFormData) => {
@@ -85,7 +111,7 @@ const Orders = () => {
     );
   }
 
-  const rows = data.orders.map((order) => ({
+  const rows = filteredProducts?.map((order) => ({
     orderId: order.orderId,
     merchantName: order.merchant.name,
     merchantPhoneNumber: order.merchant.phoneNumber,
@@ -106,12 +132,56 @@ const Orders = () => {
           <PlusCircleIcon className="w-5 h-5 mr-2 !text-gray-200" /> Take Order
         </button>
       </div>
+      <Dialog open={openFilter} onClose={() => setOpenFilter(false)}>
+        <DialogTitle>Popup Title</DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+            <DateRangePicker
+              ranges={dateRange}
+              onChange={(ranges: any) => setDateRange([ranges.selection])}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenFilter(false)} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       <DataGrid
         disableColumnSelector
         rows={rows}
         columns={columns}
         getRowId={(row) => row.orderId}
-        slots={{ toolbar: GridToolbar }}
+        slots={{
+          toolbar: () => (
+            <Box display="flex" gap={2} alignItems="center" padding={1}>
+              <GridToolbar />
+              <Button
+                onClick={() => setOpenFilter(true)}
+                variant="contained"
+                color="primary"
+              >
+                Show Order Date Filter
+              </Button>
+              <Button
+                onClick={() =>
+                  setDateRange([
+                    {
+                      startDate: undefined,
+                      endDate: undefined,
+                      key: "selection",
+                    },
+                  ])
+                }
+                color="secondary"
+                variant="outlined"
+              >
+                Reset Order Date Filter
+              </Button>
+            </Box>
+          ),
+        }}
         slotProps={{
           toolbar: {
             showQuickFilter: true,

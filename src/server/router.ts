@@ -145,36 +145,6 @@ export const appRouter = t.router({
         },
       });
 
-      // Aggregate data by category and calculate total expenses
-      const expenseByCategory = expenses.reduce((acc, expense) => {
-        if (!acc[expense.category]) {
-          acc[expense.category] = { category: expense.category, amount: 0 };
-        }
-        acc[expense.category].amount += expense.amount;
-        return acc;
-      }, {} as Record<string, { category: string; amount: number }>);
-
-      // Create a unique color for each category
-      const colorPalette = [
-        "#FF6347",
-        "#4682B4",
-        "#32CD32",
-        "#FFD700",
-        "#8A2BE2",
-        "#D2691E",
-        "#FF1493",
-        "#00BFFF",
-        "#8B0000",
-        "#A52A2A",
-      ];
-
-      const categoryData = Object.values(expenseByCategory).map(
-        (item, index) => ({
-          ...item,
-          color: colorPalette[index % colorPalette.length], // Cycle through colors
-        })
-      );
-
       const totalExpenses = expenses.reduce(
         (sum, expense) => sum + expense.amount,
         0
@@ -182,7 +152,6 @@ export const appRouter = t.router({
 
       return {
         expenses,
-        expenseByCategory: categoryData,
         totalExpenses,
       };
     } catch (error) {
