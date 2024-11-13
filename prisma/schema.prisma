@@ -76,3 +76,12 @@ model Expense {
   createdAt   DateTime @default(now())
   description String
 }
+
+model Employee {
+  employeeId  String   @id
+  name        String
+  phoneNumber String
+  role        String
+  location    String
+  joinedDate  DateTime
+}

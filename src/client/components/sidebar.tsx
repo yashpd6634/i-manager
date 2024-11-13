@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   User,
   ShoppingCart,
+  UserPen,
 } from "lucide-react";
 // import Image from "next/image";
 import { useLocation } from "react-router-dom";
@@ -147,6 +148,12 @@ const Sidebar = () => {
           href="/expenses"
           icon={IndianRupee}
           label="Expenses"
+          isCollapsed={isSidebarCollapsed}
+        />
+        <SidebarLink
+          href="/employees"
+          icon={UserPen}
+          label="Employees"
           isCollapsed={isSidebarCollapsed}
         />
         <SidebarLink

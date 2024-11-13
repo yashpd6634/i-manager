@@ -376,6 +376,48 @@ export const appRouter = t.router({
         });
       }
     }),
+  getEmployees: t.procedure.query(async () => {
+    try {
+      const employees = await prisma.employee.findMany();
+
+      return { employees };
+    } catch (error) {
+      console.log("Error retrieving employees", error);
+    }
+  }),
+  addEmployee: t.procedure
+    .input(
+      z.object({
+        employeeId: z.string(),
+        name: z.string(),
+        phoneNumber: z.string(),
+        role: z.string(),
+        location: z.string(),
+        joinedDate: z.date(),
+      })
+    )
+    .mutation(
+      async ({
+        input: { employeeId, name, phoneNumber, role, location, joinedDate },
+      }) => {
+        try {
+          const employee = await prisma.employee.create({
+            data: {
+              employeeId,
+              name,
+              phoneNumber,
+              role,
+              location,
+              joinedDate,
+            },
+          });
+
+          return employee;
+        } catch (error) {
+          console.log("Error creating employees", error);
+        }
+      }
+    ),
 });
 
 export type AppRouter = typeof appRouter;
