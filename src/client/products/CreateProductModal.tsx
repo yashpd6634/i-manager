@@ -127,7 +127,8 @@ const CreateProductModal = ({
             Purchased Quantity
           </label>
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             name="purchasedQuantity"
             placeholder="Purchased Quantity"
             onChange={handleChange}

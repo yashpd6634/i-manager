@@ -194,6 +194,7 @@ export const appRouter = t.router({
       const orders = await prisma.order.findMany({
         include: {
           merchant: true,
+          billGeneratedBy: true,
         },
       });
 
@@ -216,13 +217,31 @@ export const appRouter = t.router({
             stockSource: z.enum(["Godown", "Shop"]), // Add stockSource here
           })
         ),
+        billId: z.string(),
+        billGeneratedById: z.string(),
+        paymentByUPI: z.number(),
+        paymentByCheck: z.number(),
+        paymentByCash: z.number(),
+        accountType: z.string(),
         totalBill: z.number(),
         totalPaid: z.number(),
       })
     )
     .mutation(
       async ({
-        input: { orderId, merchantId, products, totalBill, totalPaid },
+        input: {
+          orderId,
+          merchantId,
+          products,
+          billId,
+          billGeneratedById,
+          paymentByUPI,
+          paymentByCheck,
+          paymentByCash,
+          accountType,
+          totalBill,
+          totalPaid,
+        },
       }) => {
         try {
           // Start transaction for atomic operations
@@ -232,6 +251,12 @@ export const appRouter = t.router({
               data: {
                 orderId,
                 merchantId,
+                billId,
+                billGeneratedById,
+                paymentByUPI,
+                paymentByCheck,
+                paymentByCash,
+                accountType,
                 totalBill,
                 totalPaid,
               },

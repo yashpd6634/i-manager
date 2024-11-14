@@ -50,6 +50,16 @@ model Order {
   orderedProducts OrderedProduct[]
   orderDate       DateTime         @default(now())
 
+  billId            String
+  billGeneratedById String
+  billGeneratedBy   Employee @relation(fields: [billGeneratedById], references: [employeeId], onDelete: Cascade)
+
+  paymentByUPI   Int @default(0)
+  paymentByCash  Int @default(0)
+  paymentByCheck Int @default(0)
+
+  accountType String @default("None")
+
   totalBill Int
   totalPaid Int
 }
@@ -83,5 +93,6 @@ model Employee {
   phoneNumber String
   role        String
   location    String
+  orders      Order[]
   joinedDate  DateTime
 }

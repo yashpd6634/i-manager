@@ -76,7 +76,8 @@ const CreateMerchantModal = ({
             Phone Number
           </label>
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             name="phoneNumber"
             placeholder="Phone Number"
             onChange={handleChange}
