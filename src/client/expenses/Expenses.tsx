@@ -26,6 +26,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
 } from "@mui/material";
 import { DateRangePicker } from "react-date-range";
 import dayjs from "dayjs";
@@ -173,12 +177,6 @@ const Expenses = () => {
 
   const aggregatedData = useMemo(() => categoryData ?? [], [categoryData]);
 
-  const classNames = {
-    label: "block text-sm font-medium text-gray-700",
-    selectInput:
-      "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md",
-  };
-
   if (isLoading) return <div className="py-4">Loading...</div>;
 
   if (isError || !data)
@@ -209,35 +207,41 @@ const Expenses = () => {
           <div className="space-y-4">
             {/* CATEGORY */}
             <div>
-              <label htmlFor="category" className={classNames.label}>
-                Category
-              </label>
-              <select
+              <InputLabel id="category-label">Category</InputLabel>
+              <Select
+                labelId="category-label"
                 id="category"
-                name="category"
-                className={classNames.selectInput}
-                defaultValue="All"
+                value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
+                label="Category"
+                fullWidth
+                className="my-2"
               >
-                <option>All</option>
-                <option>Office</option>
-                <option>Professional</option>
-                <option>Salaries</option>
-              </select>
+                <MenuItem value="All">All</MenuItem>
+                <MenuItem value="Office">Office</MenuItem>
+                <MenuItem value="Professional">Professional</MenuItem>
+                <MenuItem value="Salaries">Salaries</MenuItem>
+              </Select>
             </div>
             {/* START DATE */}
             <div>
-              <label htmlFor="start-date" className={classNames.label}>
-                Start Date
-              </label>
-              <input
-                type="date"
+              <TextField
                 id="start-date"
-                name="start-date"
-                className={classNames.selectInput}
+                label="Start Date"
+                type="date"
+                variant="outlined"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
                 value={
                   dateRange[0].startDate
-                    ? dateRange[0].startDate.toISOString().split("T")[0]
+                    ? new Date(
+                        dateRange[0].startDate.getTime() -
+                          dateRange[0].startDate.getTimezoneOffset() * 60000
+                      )
+                        .toISOString()
+                        .split("T")[0]
                     : ""
                 }
                 onChange={(e) =>
@@ -245,7 +249,10 @@ const Expenses = () => {
                     {
                       ...prevRange[0],
                       startDate: e.target.value
-                        ? new Date(e.target.value)
+                        ? new Date(
+                            new Date(e.target.value).getTime() +
+                              new Date().getTimezoneOffset() * 60000
+                          )
                         : undefined,
                     },
                   ])
@@ -253,18 +260,21 @@ const Expenses = () => {
               />
             </div>
             {/* END DATE */}
-            <div>
-              <label htmlFor="end-date" className={classNames.label}>
-                End Date
-              </label>
-              <input
-                type="date"
+            <div style={{ marginTop: "16px" }}>
+              <TextField
                 id="end-date"
-                name="end-date"
-                className={classNames.selectInput}
+                label="End Date"
+                type="date"
+                variant="outlined"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
                 value={
                   dateRange[0].endDate
-                    ? dateRange[0].endDate.toISOString().split("T")[0]
+                    ? new Date(dateRange[0].endDate.getTime() - dateRange[0].endDate.getTimezoneOffset() * 60000)
+                        .toISOString()
+                        .split("T")[0]
                     : ""
                 }
                 onChange={(e) =>
@@ -272,7 +282,7 @@ const Expenses = () => {
                     {
                       ...prevRange[0],
                       endDate: e.target.value
-                        ? new Date(e.target.value)
+                        ? new Date(new Date(e.target.value).getTime() + new Date().getTimezoneOffset() * 60000)
                         : undefined,
                     },
                   ])
