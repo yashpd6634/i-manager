@@ -283,7 +283,7 @@ const Inventory = () => {
     <div className="flex flex-col">
       <Header name="Inventory" />
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Popup Title</DialogTitle>
+        <DialogTitle>Expired Filter</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
             <DateRangePicker

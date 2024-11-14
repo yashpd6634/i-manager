@@ -6,6 +6,7 @@ import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import AddMerchantModal from "./AddMerchantModal";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 
 const AddMoney = ({
   merchantId,
@@ -78,62 +79,6 @@ const AddMoney = ({
   );
 };
 
-const columns: GridColDef[] = [
-  { field: "name", headerName: "Name", width: 200 },
-  { field: "phoneNumber", headerName: "Phone Number", width: 100 },
-  { field: "location", headerName: "Location", width: 200 },
-  {
-    field: "balance",
-    headerName: "Balance",
-    width: 200,
-    type: "number",
-    valueGetter: (value, row) => `₹${row.balance}`,
-  },
-  {
-    field: "addMoney",
-    headerName: "Actions",
-    width: 200,
-    renderCell: (params) => {
-      const { merchantId, balance } = params.row;
-      const [currentBalance, setCurrentBalance] = useState(balance);
-
-      return (
-        <AddMoney
-          merchantId={merchantId}
-          balance={currentBalance}
-          setBalance={setCurrentBalance}
-        />
-      );
-    },
-  },
-  {
-    field: "createdAt",
-    headerName: "Created At",
-    width: 150,
-    type: "date",
-    valueGetter: (value, row) => new Date(row.createdAt),
-    valueFormatter: (value) => {
-      const date = value as Date;
-      return date
-        ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
-        : ""; // Format the date and time
-    },
-  },
-  {
-    field: "updatedAt",
-    headerName: "Updated At",
-    width: 150,
-    type: "date",
-    valueGetter: (value, row) => new Date(row.updatedAt),
-    valueFormatter: (value) => {
-      const date = value as Date;
-      return date
-        ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
-        : ""; // Format the date and time
-    },
-  },
-];
-
 type MerchantFormData = {
   merchantId: string;
   name: string;
@@ -144,6 +89,7 @@ type MerchantFormData = {
 
 const Merchants = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const { data, isError, isLoading } = trpc.getMerchants.useQuery();
   const mutation = trpc.addMerchant.useMutation({
@@ -156,6 +102,78 @@ const Merchants = () => {
   const handleAddMerchant = (merchantData: MerchantFormData) => {
     mutation.mutate(merchantData);
   };
+
+  const columns: GridColDef[] = [
+    {
+      field: "name",
+      headerName: "Name",
+      width: 200,
+      renderCell: (params: any) => {
+        const merchantId = params.row.merchantId; // Assuming each row has merchantId
+        return (
+          <Button
+            onClick={() => navigate(`/merchants/${merchantId}`)} // Navigate to merchant page with merchantId
+            variant="text"
+            color="primary"
+          >
+            {params.row.name}
+          </Button>
+        );
+      },
+    },
+    { field: "phoneNumber", headerName: "Phone Number", width: 100 },
+    { field: "location", headerName: "Location", width: 200 },
+    {
+      field: "balance",
+      headerName: "Balance",
+      width: 200,
+      type: "number",
+      valueGetter: (value, row) => `₹${row.balance}`,
+    },
+    {
+      field: "addMoney",
+      headerName: "Actions",
+      width: 200,
+      renderCell: (params) => {
+        const { merchantId, balance } = params.row;
+        const [currentBalance, setCurrentBalance] = useState(balance);
+
+        return (
+          <AddMoney
+            merchantId={merchantId}
+            balance={currentBalance}
+            setBalance={setCurrentBalance}
+          />
+        );
+      },
+    },
+    {
+      field: "createdAt",
+      headerName: "Created At",
+      width: 150,
+      type: "date",
+      valueGetter: (value, row) => new Date(row.createdAt),
+      valueFormatter: (value) => {
+        const date = value as Date;
+        return date
+          ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
+          : ""; // Format the date and time
+      },
+    },
+    {
+      field: "updatedAt",
+      headerName: "Updated At",
+      width: 150,
+      type: "date",
+      valueGetter: (value, row) => new Date(row.updatedAt),
+      valueFormatter: (value) => {
+        const date = value as Date;
+        return date
+          ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
+          : ""; // Format the date and time
+      },
+    },
+  ];
 
   if (isLoading) {
     return <div className="py-4">Loading...</div>;

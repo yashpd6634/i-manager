@@ -350,7 +350,7 @@ const Expenses = () => {
       <div className="mt-6 bg-white shadow rounded-lg overflow-hidden">
         <h3 className="text-lg font-semibold px-6 py-4">Expense Details</h3>
         <Dialog open={openFilter} onClose={() => setOpenFilter(false)}>
-          <DialogTitle>Popup Title</DialogTitle>
+          <DialogTitle>Expense Filter</DialogTitle>
           <DialogContent>
             <Box
               display="flex"
