@@ -111,7 +111,10 @@ const Expenses = () => {
 
     return (
       (!startDate || expendDate.isSameOrAfter(startDate, "day")) &&
-      (!endDate || expendDate.isSameOrBefore(endDate, "day"))
+      (!endDate || expendDate.isSameOrBefore(endDate, "day")) &&
+      (selectedCategory === "All"
+        ? true
+        : expense.category === selectedCategory)
     );
   });
 
