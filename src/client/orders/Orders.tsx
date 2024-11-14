@@ -280,15 +280,6 @@ const Orders = () => {
               >
                 Reset Order Date Filter
               </Button>
-              <Button
-                onClick={() => {
-                  calculateExpenses(apiRef);
-                }}
-                variant="contained"
-                color="warning"
-              >
-                Calculate Bills
-              </Button>
             </Box>
           ),
         }}
@@ -299,6 +290,7 @@ const Orders = () => {
         }}
         checkboxSelection
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
+        onStateChange={() => calculateExpenses(apiRef)}
       />
 
       <TakeOrderModal
