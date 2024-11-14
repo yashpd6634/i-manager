@@ -203,6 +203,29 @@ export const appRouter = t.router({
       console.log("Error retrieving orders", error);
     }
   }),
+  getOrderById: t.procedure
+    .input(
+      z.object({
+        orderId: z.string(),
+      })
+    )
+    .query(async ({ input: { orderId } }) => {
+      try {
+        const order = await prisma.order.findUnique({
+          where: { orderId: orderId },
+          include: {
+            merchant: true,
+            billGeneratedBy: true,
+            orderedProducts: true,
+          },
+        });
+
+        return { order };
+      } catch (error) {
+        console.log("Error retrieving order", error);
+        throw new Error("Failed to retrieve order details");
+      }
+    }),
   takeOrder: t.procedure
     .input(
       z.object({

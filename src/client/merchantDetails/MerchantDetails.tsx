@@ -18,83 +18,9 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DateRangePicker } from "react-date-range";
 import { GridApiCommunity } from "@mui/x-data-grid/internals";
-
-const columns: GridColDef[] = [
-  { field: "orderId", headerName: "Order ID", width: 100 },
-  { field: "merchantName", headerName: "Merchant Name", width: 150 },
-  {
-    field: "merchantPhoneNumber",
-    headerName: "Merchant Phone Number",
-    width: 100,
-  },
-  { field: "merchantLocation", headerName: "Merchant Location", width: 200 },
-  {
-    field: "orderDate",
-    headerName: "Order Date",
-    width: 180,
-    type: "date",
-    valueGetter: (value, row) => new Date(row.orderDate),
-    valueFormatter: (value) => {
-      const date = value as Date;
-      return date
-        ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
-        : "";
-    },
-  },
-  {
-    field: "billId",
-    headerName: "Bill ID",
-    width: 100,
-    type: "string",
-    valueGetter: (value, row) => `${row.billId}`,
-  },
-  {
-    field: "paymentByUPI",
-    headerName: "Payment By UPI",
-    width: 100,
-    type: "number",
-    valueGetter: (value, row) => `₹${row.paymentByUPI}`,
-  },
-  {
-    field: "paymentByCash",
-    headerName: "Payment By Cash",
-    width: 100,
-    type: "number",
-    valueGetter: (value, row) => `₹${row.paymentByCash}`,
-  },
-  {
-    field: "paymentByCheck",
-    headerName: "Payment By Check",
-    width: 100,
-    type: "number",
-    valueGetter: (value, row) => `₹${row.paymentByCheck}`,
-  },
-  {
-    field: "accountType",
-    headerName: "Account Type",
-    width: 100,
-    type: "string",
-    valueGetter: (value, row) => `${row.accountType}`,
-  },
-  {
-    field: "totalBill",
-    headerName: "Total Bill",
-    width: 100,
-    type: "number",
-    valueGetter: (value, row) => `₹${row.totalBill}`,
-  },
-  {
-    field: "totalPaid",
-    headerName: "Total Paid",
-    width: 100,
-    type: "number",
-    valueGetter: (value, row) =>
-      `₹${row.paymentByUPI + row.paymentByCash + row.paymentByCheck}`,
-  },
-];
 
 const MerchantDetails = () => {
   const { merchantId } = useParams<{ merchantId: string }>();
@@ -105,6 +31,7 @@ const MerchantDetails = () => {
   const [totalBill, setTotalBill] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
   const apiRef = useGridApiRef();
+  const navigate = useNavigate();
 
   // Fetch orders for the particular merchant
   const { data, error, isLoading } = trpc.getOrders.useQuery();
@@ -147,6 +74,96 @@ const MerchantDetails = () => {
     setTotalBill(totalBill);
     setTotalPaid(totalPaid);
   };
+
+  const columns: GridColDef[] = [
+    {
+      field: "orderId",
+      headerName: "Order ID",
+      width: 120,
+      renderCell: (params: any) => {
+        const orderId = params.row.orderId; // Assuming each row has merchantId
+        return (
+          <Button
+            onClick={() => navigate(`/orders/${orderId}`)} // Navigate to merchant page with merchantId
+            variant="text"
+            color="primary"
+          >
+            {params.row.orderId}
+          </Button>
+        );
+      },
+    },
+    { field: "merchantName", headerName: "Merchant Name", width: 150 },
+    {
+      field: "merchantPhoneNumber",
+      headerName: "Merchant Phone Number",
+      width: 100,
+    },
+    { field: "merchantLocation", headerName: "Merchant Location", width: 200 },
+    {
+      field: "orderDate",
+      headerName: "Order Date",
+      width: 180,
+      type: "date",
+      valueGetter: (value, row) => new Date(row.orderDate),
+      valueFormatter: (value) => {
+        const date = value as Date;
+        return date
+          ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
+          : "";
+      },
+    },
+    {
+      field: "billId",
+      headerName: "Bill ID",
+      width: 100,
+      type: "string",
+      valueGetter: (value, row) => `${row.billId}`,
+    },
+    {
+      field: "paymentByUPI",
+      headerName: "Payment By UPI",
+      width: 100,
+      type: "number",
+      valueGetter: (value, row) => `₹${row.paymentByUPI}`,
+    },
+    {
+      field: "paymentByCash",
+      headerName: "Payment By Cash",
+      width: 100,
+      type: "number",
+      valueGetter: (value, row) => `₹${row.paymentByCash}`,
+    },
+    {
+      field: "paymentByCheck",
+      headerName: "Payment By Check",
+      width: 100,
+      type: "number",
+      valueGetter: (value, row) => `₹${row.paymentByCheck}`,
+    },
+    {
+      field: "accountType",
+      headerName: "Account Type",
+      width: 100,
+      type: "string",
+      valueGetter: (value, row) => `${row.accountType}`,
+    },
+    {
+      field: "totalBill",
+      headerName: "Total Bill",
+      width: 100,
+      type: "number",
+      valueGetter: (value, row) => `₹${row.totalBill}`,
+    },
+    {
+      field: "totalPaid",
+      headerName: "Total Paid",
+      width: 100,
+      type: "number",
+      valueGetter: (value, row) =>
+        `₹${row.paymentByUPI + row.paymentByCash + row.paymentByCheck}`,
+    },
+  ];
 
   if (isLoading) {
     return <div className="py-4">Loading...</div>;
