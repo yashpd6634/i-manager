@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
+import { Box, Button, Dialog, DialogContent, DialogTitle, TextField } from "@mui/material";
 
 type ExpenseFormData = {
   expenseId: string;
@@ -57,88 +58,85 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
     "block w-full mb-2 p-2 border-gray-500 border-2 rounded-md";
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <Header name="Add New Expense" />
-        <form onSubmit={handleSubmit} className="mt-5">
+    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>Add New Expense</DialogTitle>
+      <DialogContent>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
           {/* EXPENSE CATEGORY */}
-          <label htmlFor="category" className={labelCssStyles}>
-            Category
-          </label>
-          <input
-            type="text"
+          <TextField
+            label="Category"
             name="category"
             placeholder="Category"
             onChange={handleChange}
             value={formData.category}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
           />
 
           {/* AMOUNT */}
-          <label htmlFor="amount" className={labelCssStyles}>
-            Amount
-          </label>
-          <input
-            type="text"
+          <TextField
+            label="Amount"
             name="amount"
             placeholder="Amount"
             onChange={(e) => {
               const value = e.target.value;
-              // Allow only numbers and one decimal point
               if (/^\d*\.?\d*$/.test(value)) {
                 handleChange(e);
               }
             }}
             value={formData.amount || ""}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
           />
 
-          {/* EXPEND DATE */}
-          <label htmlFor="expendDate" className={labelCssStyles}>
-            Expenditure Date
-          </label>
-          <input
+          {/* EXPENDITURE DATE */}
+          <TextField
+            label="Expenditure Date"
             type="date"
             name="expendDate"
-            placeholder="Expenditure Date"
             onChange={handleChange}
             value={formattedExpendDate}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
 
           {/* DESCRIPTION */}
-          <label htmlFor="description" className={labelCssStyles}>
-            Description
-          </label>
-          <textarea
+          <TextField
+            label="Description"
             name="description"
             placeholder="Description"
             onChange={handleChange}
             value={formData.description}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
+            multiline
+            rows={4}
           />
 
-          {/* ACTIONS */}
-          <button
-            type="submit"
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-          >
-            Add Expense
-          </button>
-          <button
-            onClick={onClose}
-            type="button"
-            className="ml-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700"
-          >
-            Cancel
-          </button>
-        </form>
-      </div>
-    </div>
+          {/* ACTION BUTTONS */}
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+            <Button
+              onClick={onClose}
+              variant="outlined"
+              color="secondary"
+              sx={{ mr: 2 }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" color="primary">
+              Add Expense
+            </Button>
+          </Box>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 };
 

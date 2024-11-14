@@ -1,6 +1,14 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
 
 type EmployeeFormData = {
   employeeId: string;
@@ -35,7 +43,7 @@ const CreateEmployeeModal = ({
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: name === "joinedDate" ? new Date(value) : value,
     });
   };
 
@@ -56,95 +64,91 @@ const CreateEmployeeModal = ({
     "block w-full mb-2 p-2 border-gray-500 border-2 rounded-md";
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <Header name="Create New Employee" />
-        <form onSubmit={handleSubmit} className="mt-5">
+    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>Create New Employee</DialogTitle>
+      <DialogContent>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
           {/* EMPLOYEE NAME */}
-          <label htmlFor="name" className={labelCssStyles}>
-            Employee Name
-          </label>
-          <input
-            type="text"
+          <TextField
+            label="Employee Name"
             name="name"
             placeholder="Name"
             onChange={handleChange}
             value={formData.name}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
           />
 
-          {/* PRICE */}
-          <label htmlFor="phoneNumber" className={labelCssStyles}>
-            Phone Number
-          </label>
-          <input
-            type="text"
-            inputMode="numeric"
+          {/* PHONE NUMBER */}
+          <TextField
+            label="Phone Number"
             name="phoneNumber"
             placeholder="Phone Number"
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
             onChange={handleChange}
             value={formData.phoneNumber}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
           />
 
-          <label htmlFor="role" className={labelCssStyles}>
-            Role
-          </label>
-          <input
-            type="text"
+          {/* ROLE */}
+          <TextField
+            label="Role"
             name="role"
             placeholder="Role"
             onChange={handleChange}
             value={formData.role}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
           />
 
-          <label htmlFor="location" className={labelCssStyles}>
-            Location
-          </label>
-          <input
-            type="text"
+          {/* LOCATION */}
+          <TextField
+            label="Location"
             name="location"
             placeholder="Location"
             onChange={handleChange}
             value={formData.location}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
           />
 
-          <label htmlFor="joinedDate" className={labelCssStyles}>
-            Joined Date
-          </label>
-          <input
-            type="date"
+          {/* JOINED DATE */}
+          <TextField
+            label="Joined Date"
             name="joinedDate"
-            placeholder="Joined Date"
+            type="date"
             onChange={handleChange}
             value={formattedJoinedDate}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
 
-          {/* CREATE ACTIONS */}
-          <button
-            type="submit"
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-          >
-            Create
-          </button>
-          <button
-            onClick={onClose}
-            type="button"
-            className="ml-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700"
-          >
-            Cancel
-          </button>
-        </form>
-      </div>
-    </div>
+          {/* ACTION BUTTONS */}
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+            <Button
+              onClick={onClose}
+              variant="outlined"
+              color="secondary"
+              sx={{ mr: 2 }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" color="primary">
+              Create
+            </Button>
+          </Box>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -218,9 +218,14 @@ const Expenses = () => {
                 className="my-2"
               >
                 <MenuItem value="All">All</MenuItem>
-                <MenuItem value="Office">Office</MenuItem>
-                <MenuItem value="Professional">Professional</MenuItem>
-                <MenuItem value="Salaries">Salaries</MenuItem>
+                <MenuItem value="Rent">Rent</MenuItem>
+                <MenuItem value="StaffPayment">Staff Payment</MenuItem>
+                <MenuItem value="ElectricityBill">Electricity Bill</MenuItem>
+                <MenuItem value="Transportation">Transportation</MenuItem>
+                <MenuItem value="Marketing">Marketing</MenuItem>
+                <MenuItem value="MaintenanceShop">Maintenance - Shop</MenuItem>
+                <MenuItem value="MaintenanceSelf">Maintenance - Self</MenuItem>
+                <MenuItem value="Others">Others</MenuItem>
               </Select>
             </div>
             {/* START DATE */}
@@ -272,7 +277,10 @@ const Expenses = () => {
                 }}
                 value={
                   dateRange[0].endDate
-                    ? new Date(dateRange[0].endDate.getTime() - dateRange[0].endDate.getTimezoneOffset() * 60000)
+                    ? new Date(
+                        dateRange[0].endDate.getTime() -
+                          dateRange[0].endDate.getTimezoneOffset() * 60000
+                      )
                         .toISOString()
                         .split("T")[0]
                     : ""
@@ -282,7 +290,10 @@ const Expenses = () => {
                     {
                       ...prevRange[0],
                       endDate: e.target.value
-                        ? new Date(new Date(e.target.value).getTime() + new Date().getTimezoneOffset() * 60000)
+                        ? new Date(
+                            new Date(e.target.value).getTime() +
+                              new Date().getTimezoneOffset() * 60000
+                          )
                         : undefined,
                     },
                   ])

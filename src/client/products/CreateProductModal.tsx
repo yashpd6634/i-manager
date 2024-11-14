@@ -1,6 +1,14 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
 
 type ProductFormData = {
   productId: string;
@@ -31,7 +39,9 @@ const CreateProductModal = ({
     expiryDate: new Date(),
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -65,109 +75,101 @@ const CreateProductModal = ({
     "block w-full mb-2 p-2 border-gray-500 border-2 rounded-md";
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-20">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <Header name="Create New Product" />
-        <form onSubmit={handleSubmit} className="mt-5">
+    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>Create New Product</DialogTitle>
+      <DialogContent>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
           {/* PRODUCT NAME */}
-          <label htmlFor="productName" className={labelCssStyles}>
-            Product Name
-          </label>
-          <input
-            type="text"
+          <TextField
+            label="Product Name"
             name="name"
             placeholder="Name"
             onChange={handleChange}
             value={formData.name}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
           />
 
-          {/* PRICE */}
-          <label htmlFor="wholesalePrice" className={labelCssStyles}>
-            Wholesale Price
-          </label>
-          <input
-            type="text" // Change to text to allow decimal input easily
+          {/* WHOLESALE PRICE */}
+          <TextField
+            label="Wholesale Price"
             name="wholesalePrice"
             placeholder="Wholesale Price"
             onChange={(e) => {
               const value = e.target.value;
-              // Allow only numbers and one decimal point
               if (/^\d*\.?\d*$/.test(value)) {
                 handleChange(e);
               }
             }}
-            value={formData.wholesalePrice || ""} // Ensure it's a string
-            className={inputCssStyles}
+            value={formData.wholesalePrice || ""}
+            fullWidth
             required
+            margin="normal"
           />
 
-          <label htmlFor="retailPrice" className={labelCssStyles}>
-            Retail Price
-          </label>
-          <input
-            type="text"
+          {/* RETAIL PRICE */}
+          <TextField
+            label="Retail Price"
             name="retailPrice"
             placeholder="Retail Price"
             onChange={(e) => {
               const value = e.target.value;
-              // Allow only numbers and one decimal point
               if (/^\d*\.?\d*$/.test(value)) {
                 handleChange(e);
               }
             }}
             value={formData.retailPrice || ""}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
           />
 
-          {/* STOCK QUANTITY */}
-          <label htmlFor="purchasedQuantity" className={labelCssStyles}>
-            Purchased Quantity
-          </label>
-          <input
-            type="text"
-            inputMode="numeric"
+          {/* PURCHASED QUANTITY */}
+          <TextField
+            label="Purchased Quantity"
             name="purchasedQuantity"
             placeholder="Purchased Quantity"
             onChange={handleChange}
             value={formData.purchasedQuantity}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
 
           {/* EXPIRY DATE */}
-          <label htmlFor="expiryDate" className={labelCssStyles}>
-            Expiry Date
-          </label>
-          <input
+          <TextField
+            label="Expiry Date"
             type="date"
             name="expiryDate"
-            placeholder="expiryDate"
             onChange={handleChange}
             value={formattedExpiryDate}
-            className={inputCssStyles}
+            fullWidth
             required
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
 
-          {/* CREATE ACTIONS */}
-          <button
-            type="submit"
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-          >
-            Create
-          </button>
-          <button
-            onClick={onClose}
-            type="button"
-            className="ml-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700"
-          >
-            Cancel
-          </button>
-        </form>
-      </div>
-    </div>
+          {/* ACTION BUTTONS */}
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+            <Button
+              onClick={onClose}
+              variant="outlined"
+              color="secondary"
+              sx={{ mr: 2 }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" color="primary">
+              Create
+            </Button>
+          </Box>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 };
 
