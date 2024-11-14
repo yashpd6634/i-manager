@@ -1,7 +1,18 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
-import { Box, Button, Dialog, DialogContent, DialogTitle, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TextField,
+} from "@mui/material";
 
 type ExpenseFormData = {
   expenseId: string;
@@ -27,7 +38,9 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
   });
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e:
+      | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -48,6 +61,13 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onAdd(formData);
+    setFormData({
+      expenseId: v4(),
+      category: "",
+      amount: "",
+      expendDate: new Date(),
+      description: "",
+    });
     onClose();
   };
 
@@ -63,16 +83,28 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
       <DialogContent>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
           {/* EXPENSE CATEGORY */}
-          <TextField
-            label="Category"
+          <InputLabel id="category-label">Category</InputLabel>
+          <Select
+            labelId="category-label"
+            id="category"
             name="category"
             placeholder="Category"
-            onChange={handleChange}
             value={formData.category}
+            onChange={(e) => handleChange(e)}
+            label="Category"
             fullWidth
-            required
-            margin="normal"
-          />
+            className="my-2"
+          >
+            <MenuItem value="All">All</MenuItem>
+            <MenuItem value="Rent">Rent</MenuItem>
+            <MenuItem value="StaffPayment">Staff Payment</MenuItem>
+            <MenuItem value="ElectricityBill">Electricity Bill</MenuItem>
+            <MenuItem value="Transportation">Transportation</MenuItem>
+            <MenuItem value="Marketing">Marketing</MenuItem>
+            <MenuItem value="MaintenanceShop">Maintenance - Shop</MenuItem>
+            <MenuItem value="MaintenanceSelf">Maintenance - Self</MenuItem>
+            <MenuItem value="Others">Others</MenuItem>
+          </Select>
 
           {/* AMOUNT */}
           <TextField
@@ -123,7 +155,16 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
           {/* ACTION BUTTONS */}
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
             <Button
-              onClick={onClose}
+              onClick={() => {
+                setFormData({
+                  expenseId: v4(),
+                  category: "",
+                  amount: "",
+                  expendDate: new Date(),
+                  description: "",
+                });
+                onClose();
+              }}
               variant="outlined"
               color="secondary"
               sx={{ mr: 2 }}
