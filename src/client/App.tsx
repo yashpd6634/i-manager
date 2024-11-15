@@ -16,7 +16,7 @@ import Orders from "./orders/Orders";
 import Employees from "./employee/EmployeeDetails";
 import MerchantDetails from "./merchantDetails/MerchantDetails";
 import OrderDetails from "./orderDetails/OrderDetails";
-import Portfolio from "./portfolio/Portfolio";
+import PortfolioProtect from "./portfolio/ProtfolioProtect";
 
 function App() {
   const [queryClient] = useState(
@@ -206,7 +206,7 @@ function App() {
             <Wrapper>
               <trpc.Provider client={trpcClient} queryClient={queryClient}>
                 <QueryClientProvider client={queryClient}>
-                  <Portfolio />
+                  <PortfolioProtect />
                 </QueryClientProvider>
               </trpc.Provider>
             </Wrapper>

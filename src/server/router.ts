@@ -596,6 +596,12 @@ export const appRouter = t.router({
         }
       }
     ),
+  checkPassword: t.procedure
+    .input(z.object({ password: z.string() }))
+    .mutation(async ({ input: { password } }) => {
+      const originalPassword = "Yash0285";
+      return { success: password === originalPassword };
+    }),
 });
 
 export type AppRouter = typeof appRouter;
