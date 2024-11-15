@@ -21,6 +21,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DateRangePicker } from "react-date-range";
 import { GridApiCommunity } from "@mui/x-data-grid/internals";
+import MoneyTransactions from "@/merchants/MoneyTransactionsTable";
 
 const MerchantDetails = () => {
   const { merchantId } = useParams<{ merchantId: string }>();
@@ -268,6 +269,7 @@ const MerchantDetails = () => {
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
         onStateChange={() => calculateExpenses(apiRef)}
       />
+      <MoneyTransactions />
     </div>
   );
 };

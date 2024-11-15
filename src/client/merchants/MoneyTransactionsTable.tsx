@@ -20,14 +20,18 @@ import {
 import { DateRangePicker } from "react-date-range";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import { useParams } from "react-router-dom";
 
 const MoneyTransactions = () => {
+  const { merchantId } = useParams<{ merchantId: string }>();
   const [dateRange, setDateRange] = useState([
     { startDate: undefined, endDate: undefined, key: "selection" },
   ]);
   const [openFilter, setOpenFilter] = useState(false);
 
-  const { data, error, isLoading } = trpc.getMoneyTransactions.useQuery(); // Assuming you have a query that fetches orders with merchant data
+  const { data, error, isLoading } = merchantId
+    ? trpc.getMoneyTransactionById.useQuery({ merchantId })
+    : trpc.getMoneyTransactions.useQuery();
 
   dayjs.extend(isSameOrAfter);
   dayjs.extend(isSameOrBefore);
@@ -135,7 +139,7 @@ const MoneyTransactions = () => {
   return (
     <div className="flex flex-col mt-8">
       <div className="flex justify-between items-center mb-6">
-        <Header name="Transactions" />
+        <Header name="Transactions without orders" />
       </div>
       <Dialog open={openFilter} onClose={() => setOpenFilter(false)}>
         <DialogTitle>Transaction Filter</DialogTitle>

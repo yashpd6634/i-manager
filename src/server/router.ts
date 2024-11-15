@@ -499,6 +499,28 @@ export const appRouter = t.router({
       console.log("Error retrieving orders", error);
     }
   }),
+  getMoneyTransactionById: t.procedure
+    .input(
+      z.object({
+        merchantId: z.string(),
+      })
+    )
+    .query(async ({ input: { merchantId } }) => {
+      try {
+        const moneyTransaction = await prisma.moneyTransaction.findMany({
+          where: { merchantId: merchantId },
+          include: {
+            merchant: true,
+            paidTo: true,
+          },
+        });
+
+        return { moneyTransaction };
+      } catch (error) {
+        console.log("Error retrieving order", error);
+        throw new Error("Failed to retrieve order details");
+      }
+    }),
   getEmployees: t.procedure.query(async () => {
     try {
       const employees = await prisma.employee.findMany();
