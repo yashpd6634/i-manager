@@ -377,7 +377,7 @@ const Portfolio = () => {
             totalProductProfit > 0 ? `text-lime-600` : `text-red-600`
           }`}
         >
-          Total {`${totalProductProfit > 0 ? `Profit` : `Loss`}`}: ₹
+          Gross {`${totalProductProfit > 0 ? `Profit` : `Loss`}`}: ₹
           {totalProductProfit}
         </h4>
       </div>
@@ -441,7 +441,7 @@ const Portfolio = () => {
             totalMerchantProfit > 0 ? `text-lime-600` : `text-red-600`
           }`}
         >
-          Total {`${totalMerchantProfit > 0 ? `Profit` : `Loss`}`}: ₹
+          Gross {`${totalMerchantProfit > 0 ? `Profit` : `Loss`}`}: ₹
           {totalMerchantProfit}
         </h4>
       </div>
