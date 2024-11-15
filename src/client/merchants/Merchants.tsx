@@ -59,7 +59,7 @@ const Merchants = () => {
       headerName: "Balance",
       width: 200,
       type: "number",
-      valueGetter: (value, row) => `₹${row.balance}`,
+      valueFormatter: (value) => `₹${value}`,
     },
     {
       field: "moneyTransfer",

@@ -21,6 +21,7 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import { CircleX } from "lucide-react";
+import dayjs from "dayjs";
 
 type OrderFormData = {
   orderId: string;
@@ -98,6 +99,13 @@ const TakeOrderModal = ({
   const { data: employeeData, isLoading: isEmployeeLoading } =
     trpc.getEmployees.useQuery();
 
+  const filteredProductData = productData?.products.filter((product) => {
+    const expiryDate = dayjs(product.expiryDate);
+    const today = dayjs();
+
+    return expiryDate.isAfter(today, "day") && product.currentQuantity !== 0;
+  });
+
   const handleMerchantChange = (value: { merchantId: string } | null) => {
     setFormData((prev) => ({
       ...prev,
@@ -157,7 +165,7 @@ const TakeOrderModal = ({
     stockSource: "Godown" | "Shop"
   ) => {
     const newProducts = [...formData.products];
-    const product = productData?.products.find(
+    const product = filteredProductData?.find(
       (p) => p.productId === newProducts[index].productId
     );
     if (product) {
@@ -303,7 +311,7 @@ const TakeOrderModal = ({
           {/* Product Selection with Searchable Dropdown */}
           <Autocomplete
             className="my-4"
-            options={productData?.products || []}
+            options={filteredProductData || []}
             getOptionLabel={(option) =>
               `${option.name} (ID - ${option.productId})` || ""
             }

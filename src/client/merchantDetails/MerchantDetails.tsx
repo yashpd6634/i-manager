@@ -57,7 +57,7 @@ const MerchantDetails = () => {
     );
   });
 
-  const calculateExpenses = (
+  const calculateBill = (
     apiRef: React.MutableRefObject<GridApiCommunity>
   ) => {
     if (
@@ -267,7 +267,7 @@ const MerchantDetails = () => {
           },
         }}
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
-        onStateChange={() => calculateExpenses(apiRef)}
+        onStateChange={() => calculateBill(apiRef)}
       />
       <MoneyTransactions />
     </div>

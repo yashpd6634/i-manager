@@ -13,6 +13,7 @@ import {
   User,
   ShoppingCart,
   UserPen,
+  BriefcaseBusiness,
 } from "lucide-react";
 // import Image from "next/image";
 import { useLocation } from "react-router-dom";
@@ -154,6 +155,12 @@ const Sidebar = () => {
           href="/employees"
           icon={UserPen}
           label="Employees"
+          isCollapsed={isSidebarCollapsed}
+        />
+        <SidebarLink
+          href="/portfolio"
+          icon={BriefcaseBusiness}
+          label="Portfolio"
           isCollapsed={isSidebarCollapsed}
         />
         <SidebarLink

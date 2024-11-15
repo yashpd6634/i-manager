@@ -104,6 +104,24 @@ export const appRouter = t.router({
         }
       }
     ),
+  updateProductPrice: t.procedure
+    .input(z.object({ productId: z.string(), amount: z.number() }))
+    .mutation(async ({ input: { productId, amount } }) => {
+      try {
+        await prisma.product.update({
+          where: { productId },
+          data: {
+            purchasedPrice: amount,
+          },
+        });
+      } catch (error) {
+        console.error("Error failed to update product price:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update product price",
+        });
+      }
+    }),
   getMerchants: t.procedure.query(async () => {
     try {
       const merchants = await prisma.merchant.findMany();
@@ -247,6 +265,21 @@ export const appRouter = t.router({
         throw new Error("Failed to retrieve order details");
       }
     }),
+  getOrdersWithProduct: t.procedure.query(async () => {
+    try {
+      const orders = await prisma.order.findMany({
+        include: {
+          merchant: true,
+          billGeneratedBy: true,
+          orderedProducts: true,
+        },
+      });
+
+      return { orders };
+    } catch (error) {
+      console.log("Error retrieving orders", error);
+    }
+  }),
   takeOrder: t.procedure
     .input(
       z.object({
