@@ -29,6 +29,7 @@ model Product {
   purchasedPrice    Float?
   wholesalePrice    Float
   retailPrice       Float
+  piecesPerQuantity Int
   purchasedQuantity Int
   expiryDate        DateTime
   currentQuantity   Int

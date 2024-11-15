@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 type ProductFormData = {
   productId: string;
   name: string;
+  piecesPerQuantity: number;
   wholesalePrice: string;
   retailPrice: string;
   purchasedQuantity: number;
@@ -109,13 +110,16 @@ const Products = () => {
                 <h3 className="text-lg text-gray-900 font-semibold">
                   {product.name}
                 </h3>
-                <p className="text-gray-800">
+                <p className="text-gray-600 font-semibold">
                   Wholsale Price: ₹{product.wholesalePrice.toFixed(2)}
                 </p>
-                <p className="text-gray-800">
+                <p className="text-gray-600 font-semibold">
                   Retail Price: ₹{product.retailPrice.toFixed(2)}
                 </p>
-                <div className="text-sm text-gray-600 mt-1">
+                <div className="text-sm text-gray-600 mt-1 font-semibold">
+                  Pieces per quantity: {product.piecesPerQuantity}
+                </div>
+                <div className="text-sm text-gray-600 mt-1 font-semibold">
                   Stock: {product.currentQuantity}
                 </div>
                 {/* {product.rating && (

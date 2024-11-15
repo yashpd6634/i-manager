@@ -1,6 +1,5 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { v4 } from "uuid";
-import Header from "@/components/header";
 import {
   Box,
   Button,
@@ -13,6 +12,7 @@ import {
 type ProductFormData = {
   productId: string;
   name: string;
+  piecesPerQuantity: number;
   wholesalePrice: string;
   retailPrice: string;
   purchasedQuantity: number;
@@ -33,6 +33,7 @@ const CreateProductModal = ({
   const [formData, setFormData] = useState({
     productId: v4(),
     name: "",
+    piecesPerQuantity: 0,
     wholesalePrice: "",
     retailPrice: "",
     purchasedQuantity: 0,
@@ -50,10 +51,10 @@ const CreateProductModal = ({
           ? new Date(value) // Convert date string to Date object for expiryDate
           : name === "wholesalePrice" || name === "retailPrice"
           ? value // Keep as a string to allow decimal typing
-          : name === "purchasedQuantity"
+          : name === "purchasedQuantity" || name === "piecesPerQuantity"
           ? value
             ? parseInt(value)
-            : 0 // Ensure purchasedQuantity is always a number
+            : 0 // Ensure purchasedQuantity and piecesPerQuantity is always a number
           : value,
     }));
   };
@@ -69,10 +70,6 @@ const CreateProductModal = ({
   };
 
   if (!isOpen) return null;
-
-  const labelCssStyles = "block text-sm font-medium text-gray-700";
-  const inputCssStyles =
-    "block w-full mb-2 p-2 border-gray-500 border-2 rounded-md";
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
@@ -123,6 +120,19 @@ const CreateProductModal = ({
             fullWidth
             required
             margin="normal"
+          />
+
+          {/* Pieces per quantity */}
+          <TextField
+            label="Pieces per quantity"
+            name="piecesPerQuantity"
+            placeholder="Pieces per quantity"
+            onChange={handleChange}
+            value={formData.piecesPerQuantity}
+            fullWidth
+            required
+            margin="normal"
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
 
           {/* PURCHASED QUANTITY */}

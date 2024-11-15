@@ -65,6 +65,7 @@ export const appRouter = t.router({
       z.object({
         productId: z.string(),
         name: z.string(),
+        piecesPerQuantity: z.number(),
         wholesalePrice: z.number(),
         retailPrice: z.number(),
         purchasedQuantity: z.number(),
@@ -76,6 +77,7 @@ export const appRouter = t.router({
         input: {
           productId,
           name,
+          piecesPerQuantity,
           wholesalePrice,
           retailPrice,
           purchasedQuantity,
@@ -87,6 +89,7 @@ export const appRouter = t.router({
             data: {
               productId,
               name,
+              piecesPerQuantity,
               wholesalePrice,
               retailPrice,
               purchasedQuantity,
