@@ -13,14 +13,15 @@ datasource db {
 }
 
 model Merchant {
-  merchantId  String   @id
-  name        String
-  phoneNumber String
-  location    String
-  orders      Order[]
-  balance     Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  merchantId        String             @id
+  name              String
+  phoneNumber       String
+  location          String
+  orders            Order[]
+  moneyTransactions MoneyTransaction[]
+  balance           Int                @default(0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model Product {
@@ -89,11 +90,35 @@ model Expense {
 }
 
 model Employee {
-  employeeId  String   @id
-  name        String
-  phoneNumber String
-  role        String
-  location    String
-  orders      Order[]
-  joinedDate  DateTime
+  employeeId       String             @id
+  name             String
+  phoneNumber      String
+  role             String
+  location         String
+  orders           Order[]
+  moneyTransaction MoneyTransaction[]
+  joinedDate       DateTime
+}
+
+model MoneyTransaction {
+  transactionId String @id
+
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [merchantId], onDelete: Cascade)
+
+  paidToId String
+  paidTo   Employee @relation(fields: [paidToId], references: [employeeId], onDelete: Cascade)
+
+  paymentType String @default("Add")
+
+  paymentByUPI   Int    @default(0)
+  paymentByCash  Int    @default(0)
+  paymentByCheck Int    @default(0)
+  accountType    String @default("None")
+
+  transactionDate DateTime @default(now())
+
+  description String?
+
+  totalAmount Int
 }

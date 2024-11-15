@@ -259,7 +259,7 @@ const TakeOrderModal = ({
 
     onCreate(filteredFormData);
     setFormData({
-      orderId: v4(),
+      orderId: "",
       merchantId: "",
       products: [],
       billId: "",
@@ -538,7 +538,7 @@ const TakeOrderModal = ({
             <button
               onClick={() => {
                 setFormData({
-                  orderId: v4(),
+                  orderId: "",
                   merchantId: "",
                   products: [],
                   billId: "",

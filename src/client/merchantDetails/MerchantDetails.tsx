@@ -36,6 +36,13 @@ const MerchantDetails = () => {
   // Fetch orders for the particular merchant
   const { data, error, isLoading } = trpc.getOrders.useQuery();
 
+  const searchMerchantId = merchantId || "";
+  const {
+    data: merchantData,
+    error: isMerchantDataError,
+    isLoading: isMerchantDataLoading,
+  } = trpc.getMerchantById.useQuery({ merchantId: searchMerchantId });
+
   // Filter orders by merchantId
   const filteredOrders = data?.orders.filter((order) => {
     const orderDate = dayjs(order.orderDate);
@@ -165,11 +172,11 @@ const MerchantDetails = () => {
     },
   ];
 
-  if (isLoading) {
+  if (isLoading || isMerchantDataLoading) {
     return <div className="py-4">Loading...</div>;
   }
 
-  if (error || !data?.orders) {
+  if (error || !data?.orders || isMerchantDataError) {
     return (
       <div className="text-center text-red-500 py-4">
         Failed to fetch orders
@@ -195,7 +202,7 @@ const MerchantDetails = () => {
   return (
     <div className="flex flex-col">
       <div className="flex justify-between items-center mb-6">
-        <Header name={`${filteredOrders?.[0]?.merchant?.name}'s Orders`} />
+        <Header name={`${merchantData?.merchant?.name}'s Orders`} />
       </div>
       <div className="flex mt-4 text-xl font-bold">
         <h4 className="text-cyan-600">Total Bill: ₹{totalBill} | </h4>

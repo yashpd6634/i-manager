@@ -62,7 +62,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
     e.preventDefault();
     onAdd(formData);
     setFormData({
-      expenseId: v4(),
+      expenseId: "",
       category: "",
       amount: "",
       expendDate: new Date(),
@@ -157,7 +157,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
             <Button
               onClick={() => {
                 setFormData({
-                  expenseId: v4(),
+                  expenseId: "",
                   category: "",
                   amount: "",
                   expendDate: new Date(),

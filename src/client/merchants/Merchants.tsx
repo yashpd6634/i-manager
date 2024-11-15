@@ -7,77 +7,8 @@ import { useState } from "react";
 import AddMerchantModal from "./AddMerchantModal";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-
-const AddMoney = ({
-  merchantId,
-  balance,
-  setBalance,
-}: {
-  merchantId: string;
-  balance: number;
-  setBalance: React.Dispatch<React.SetStateAction<number>>;
-}) => {
-  const [amount, setAmount] = useState<number | string>("");
-
-  const mutation = trpc.addMoneyToBalance.useMutation({
-    onSuccess: () => {
-      // Optionally reload data or update state after successful mutation
-      setBalance(balance + Number(amount)); // Update the balance locally after adding money
-      window.location.reload();
-    },
-  });
-
-  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(event.target.value);
-  };
-
-  const handleAddMoney = () => {
-    const addAmount = Number(amount);
-
-    if (!addAmount) {
-      alert("Please enter a valid amount to add.");
-      return;
-    }
-
-    console.log(`Adding ₹${addAmount} to merchant ${merchantId}`);
-
-    // Call the mutation to add money to the merchant's balance
-    mutation.mutate({
-      merchantId,
-      amount: addAmount,
-    });
-
-    setAmount(""); // Reset the input after the transaction
-  };
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "0.5rem",
-        paddingTop: "0.5rem",
-      }}
-    >
-      <TextField
-        size="small"
-        type="number"
-        label="Amount"
-        value={amount}
-        onChange={handleAmountChange}
-        variant="outlined"
-      />
-      <Button
-        onClick={handleAddMoney}
-        variant="contained"
-        color="primary"
-        style={{ fontSize: "0.65rem" }}
-      >
-        Add Money
-      </Button>
-    </div>
-  );
-};
+import { MoneyTransfer } from "./MoneyTransfer";
+import MoneyTransactions from "./MoneyTransactionsTable";
 
 type MerchantFormData = {
   merchantId: string;
@@ -131,15 +62,15 @@ const Merchants = () => {
       valueGetter: (value, row) => `₹${row.balance}`,
     },
     {
-      field: "addMoney",
-      headerName: "Actions",
-      width: 200,
+      field: "moneyTransfer",
+      headerName: "Money Transfer",
+      width: 120,
       renderCell: (params) => {
         const { merchantId, balance } = params.row;
         const [currentBalance, setCurrentBalance] = useState(balance);
 
         return (
-          <AddMoney
+          <MoneyTransfer
             merchantId={merchantId}
             balance={currentBalance}
             setBalance={setCurrentBalance}
@@ -211,6 +142,8 @@ const Merchants = () => {
         checkboxSelection
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />
+
+      <MoneyTransactions />
 
       <AddMerchantModal
         isOpen={isModalOpen}

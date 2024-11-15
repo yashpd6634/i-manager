@@ -113,6 +113,24 @@ export const appRouter = t.router({
       console.log("Error retrieving merchants", error);
     }
   }),
+  getMerchantById: t.procedure
+    .input(
+      z.object({
+        merchantId: z.string(),
+      })
+    )
+    .query(async ({ input: { merchantId } }) => {
+      try {
+        const merchant = await prisma.merchant.findUnique({
+          where: { merchantId: merchantId },
+        });
+
+        return { merchant };
+      } catch (error) {
+        console.log("Error retrieving merchant", error);
+        throw new Error("Failed to retrieve merchant details");
+      }
+    }),
   addMerchant: t.procedure
     .input(
       z.object({
@@ -386,47 +404,101 @@ export const appRouter = t.router({
         });
       }
     }),
-  addMoneyToBalance: t.procedure
+  paidMoneyTransaction: t.procedure
     .input(
       z.object({
+        transactionId: z.string(),
         merchantId: z.string(),
-        amount: z.number(),
+        paymentType: z.string(),
+        paidToId: z.string(),
+        paymentByUPI: z.number(),
+        paymentByCheck: z.number(),
+        paymentByCash: z.number(),
+        accountType: z.string(),
+        totalAmount: z.number(),
+        description: z.string(),
       })
     )
-    .mutation(async ({ input: { merchantId, amount } }) => {
-      try {
-        // Fetch the current stock of the product
-        const merchant = await prisma.merchant.findUnique({
-          where: { merchantId },
-        });
+    .mutation(
+      async ({
+        input: {
+          transactionId,
+          merchantId,
+          paymentType,
+          paidToId,
+          paymentByUPI,
+          paymentByCheck,
+          paymentByCash,
+          accountType,
+          totalAmount,
+          description,
+        },
+      }) => {
+        try {
+          const merchant = await prisma.merchant.findUnique({
+            where: { merchantId },
+          });
 
-        // Check if the product exists
-        if (!merchant) {
+          if (!merchant) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Merchant not found",
+            });
+          }
+
+          // Start transaction for atomic operations
+          const result = await prisma.$transaction(async (prisma) => {
+            const moneyTransaction = await prisma.moneyTransaction.create({
+              data: {
+                transactionId,
+                merchantId,
+                paymentType,
+                paidToId,
+                paymentByUPI,
+                paymentByCheck,
+                paymentByCash,
+                accountType,
+                totalAmount,
+                description,
+              },
+            });
+
+            await prisma.merchant.update({
+              where: { merchantId },
+              data: {
+                balance: {
+                  increment: paymentType === "Add" ? totalAmount : -totalAmount,
+                },
+              },
+            });
+
+            return moneyTransaction;
+          });
+
+          return result;
+        } catch (error) {
+          console.error("Error adding money to balance:", error);
           throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Merchant not found",
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to add money",
           });
         }
-
-        // Perform the stock movement: update godown and shop quantities
-        const updatedMerchnt = await prisma.merchant.update({
-          where: { merchantId },
-          data: {
-            balance: {
-              increment: amount, // Increase stock in shop
-            },
-          },
-        });
-
-        return updatedMerchnt;
-      } catch (error) {
-        console.error("Error adding money to balance:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to add money",
-        });
       }
-    }),
+    ),
+  getMoneyTransactions: t.procedure.query(async () => {
+    try {
+      const moneyTransaction = await prisma.moneyTransaction.findMany({
+        include: {
+          merchant: true,
+          paidTo: true,
+        },
+      });
+
+      return { moneyTransaction };
+    } catch (error) {
+      console.log("Error retrieving orders", error);
+    }
+  }),
   getEmployees: t.procedure.query(async () => {
     try {
       const employees = await prisma.employee.findMany();
