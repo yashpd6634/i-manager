@@ -103,7 +103,7 @@ const CardExpenseSummary = () => {
                   >
                     {expenseCategories.map((entry, index) => (
                       <Cell
-                        key={`cell-${index}`}
+                        key={`cell-₹{index}`}
                         fill={entry.color} // Use color from category data
                       />
                     ))}
@@ -112,7 +112,7 @@ const CardExpenseSummary = () => {
               </ResponsiveContainer>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center basis-2/5">
                 <span className="font-bold text-xl">
-                  ${formattedTotalExpenses}
+                  ₹{formattedTotalExpenses}
                 </span>
               </div>
             </div>
@@ -120,7 +120,7 @@ const CardExpenseSummary = () => {
             <ul className="flex flex-col justify-around items-center xl:items-start py-5 gap-3">
               {expenseCategories.map((entry, index) => (
                 <li
-                  key={`legend-${index}`}
+                  key={`legend-₹{index}`}
                   className="flex items-center text-xs"
                 >
                   <span
@@ -141,13 +141,13 @@ const CardExpenseSummary = () => {
                   <p className="text-sm">
                     Average:{" "}
                     <span className="font-semibold">
-                      ${formattedTotalExpenses}
+                      ₹{formattedTotalExpenses}
                     </span>
                   </p>
                 </div>
                 <span className="flex items-center mt-2">
                   <TrendingUp className="mr-2 text-green-500" />
-                  30%
+                  {/* 30% */}
                 </span>
               </div>
             )}

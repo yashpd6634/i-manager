@@ -1,11 +1,12 @@
 import { DashboardMetrics } from "@/store/types";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ipcRenderer } from "electron";
 import { trpc } from "@/util";
+import { Rating } from "@mui/material";
 // import Rating from "../(components)/Rating";
 
-const CardPopularProducts = () => {
+const CardMerchantSummary = () => {
   const {
     data: dashboardMetrics,
     isLoading,
@@ -30,13 +31,13 @@ const CardPopularProducts = () => {
       ) : (
         <>
           <h3 className="text-lg font-semibold px-7 pt-5 pb-2">
-            Popular Products
+            Top Merchants
           </h3>
           <hr />
           <div className="overflow-auto h-full">
-            {dashboardMetrics?.popularProducts.map((product) => (
+            {dashboardMetrics?.merchantSummary.map((merchant) => (
               <div
-                key={product.productId}
+                key={merchant.merchantId}
                 className="flex items-center justify-between gap-3 px-5 py-7 border-b"
               >
                 <div className="flex items-center gap-3">
@@ -51,26 +52,27 @@ const CardPopularProducts = () => {
                   /> */}
                   <div className="flex flex-col justify-between gap-1">
                     <div className="font-bold text-gray-700">
-                      {product.name}
+                      {merchant.name}
                     </div>
                     <div className="flex text-sm items-center">
                       <span className="font-bold text-blue-500 text-xs">
-                        ₹{product.wholesalePrice}
+                        ₹{merchant.totalBilled}
                       </span>
-                      {/* <span className="mx-2">|</span> */}
-                      {/* <Rating rating={product.rating || 0} /> */}
+                      <span className="mx-2">|</span>
+                      <span>{`${merchant.location}`}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-xs flex items-center">
+                <div
+                  className={`text-xs flex items-center font-medium ${
+                    merchant.balance > 0 ? "text-green-400" : "text-red-400"
+                  }`}
+                >
                   <button className="p-2 rounded-full bg-blue-100 text-blue-600 mr-2">
-                    <ShoppingBag className="w-4 h-4" />
+                    <Wallet className="w-4 h-4" />
                   </button>
-                  {Math.round(
-                    product.purchasedQuantity - product.currentQuantity
-                  )}{" "}
-                  Sold
+                  ₹{merchant.balance} Balance
                 </div>
               </div>
             ))}
@@ -81,4 +83,4 @@ const CardPopularProducts = () => {
   );
 };
 
-export default CardPopularProducts;
+export default CardMerchantSummary;

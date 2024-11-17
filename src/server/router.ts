@@ -15,25 +15,118 @@ const t = initTRPC.create({
   transformer: superjson,
 });
 
+type ProductSales = {
+  [productId: string]: {
+    productId: string;
+    name: string;
+    soldQuantity: number;
+    wholesalePrice: number;
+    purchasedQuantity: number;
+    currentQuantity: number;
+  };
+};
+
 export const appRouter = t.router({
   getDashboardMeterics: t.procedure.query(async () => {
     try {
-      const popularProducts = await prisma.product.findMany({
-        take: 15,
-        orderBy: {
-          currentQuantity: "desc",
+      // Get the current date
+      const currentDate = new Date();
+
+      // Calculate the date for 30 days ago
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(currentDate.getDate() - 30);
+
+      const orders = await prisma.order.findMany({
+        include: {
+          orderedProducts: true,
         },
       });
-      const expenseSummary = await prisma.expense.findMany({
-        take: 5,
+
+      const products = await prisma.product.findMany({});
+
+      const productMap = products.reduce((map, product) => {
+        map[product.productId] = product;
+        return map;
+      }, {} as Record<string, (typeof products)[0]>);
+
+      const orderSummary = orders.filter((order) => {
+        const orderDate = new Date(order.orderDate);
+        return orderDate >= thirtyDaysAgo && orderDate <= currentDate;
+      });
+
+      const productSales: ProductSales = orderSummary.reduce((acc, order) => {
+        order.orderedProducts.forEach((product) => {
+          if (!acc[product.productId]) {
+            const productDetails = productMap[product.productId];
+
+            acc[product.productId] = {
+              productId: product.productId,
+              name: product.name,
+              soldQuantity: 0,
+              wholesalePrice: productDetails?.wholesalePrice || 0,
+              purchasedQuantity: productDetails?.purchasedQuantity || 0,
+              currentQuantity: productDetails?.currentQuantity || 0,
+            };
+          }
+          acc[product.productId].soldQuantity += product.quantity;
+        });
+        return acc;
+      }, {} as ProductSales); // Cast to ProductSales type
+
+      // Convert aggregated sales into an array and sort by sold quantity
+      const popularProducts = Object.values(productSales)
+        .sort((a, b) => b.soldQuantity - a.soldQuantity)
+        .slice(0, 15); // Take top 15 products
+
+      // Fetch expenses from the database
+      const expense = await prisma.expense.findMany({
         orderBy: {
           expendDate: "desc",
         },
       });
 
+      // Filter expenses for the current month
+      const expenseSummary = expense.filter((expense) => {
+        const expenseDate = new Date(expense.expendDate);
+        return expenseDate >= thirtyDaysAgo && expenseDate <= currentDate;
+      });
+
+      const merchants = await prisma.merchant.findMany({
+        include: {
+          orders: {
+            where: {
+              orderDate: {
+                gte: thirtyDaysAgo, // Orders after the start of the month
+                lte: currentDate, // Orders before the end of the month
+              },
+            },
+          },
+        },
+      });
+
+      const merchantSummary = merchants
+        .map((merchant) => {
+          // Calculate the total billed value for the merchant
+          const totalBilled = merchant.orders.reduce((total, order) => {
+            return total + order.totalBill; // Add the totalBill of each order
+          }, 0);
+
+          return {
+            merchantId: merchant.merchantId,
+            name: merchant.name,
+            phoneNumber: merchant.phoneNumber,
+            location: merchant.location,
+            balance: merchant.balance,
+            totalBilled, // Total billed value within the current month
+          };
+        })
+        .sort((a, b) => b.totalBilled - a.totalBilled);
+
       return {
         popularProducts,
         expenseSummary,
+        orderSummary,
+        merchantSummary,
       };
     } catch (error) {
       console.log("API Failed: ", error);
