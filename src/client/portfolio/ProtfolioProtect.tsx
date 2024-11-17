@@ -38,36 +38,43 @@ const PortfolioProtect = () => {
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-        <DialogTitle>
-          Enter Password
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            style={{ position: "absolute", right: 8, top: 8 }}
-          >
-            <X />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={error}
-            helperText={error ? "Incorrect password. Try again." : ""}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handlePasswordSubmit}
-            color="primary"
-            variant="contained"
-          >
-            Submit
-          </Button>
-        </DialogActions>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handlePasswordSubmit();
+          }}
+        >
+          <DialogTitle>
+            Enter Password
+            <IconButton
+              aria-label="close"
+              onClick={handleClose}
+              style={{ position: "absolute", right: 8, top: 8 }}
+            >
+              <X />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={error}
+              helperText={error ? "Incorrect password. Try again." : ""}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              type="submit" // Makes this button trigger the form's onSubmit event
+              color="primary"
+              variant="contained"
+            >
+              Submit
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
       {!open && <Portfolio />}
     </>

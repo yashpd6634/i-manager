@@ -26,101 +26,8 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { GridApiCommunity } from "@mui/x-data-grid/internals";
 
-const productColumns: GridColDef[] = [
-  { field: "productId", headerName: "Product ID", width: 100 },
-  { field: "productName", headerName: "Product Name", width: 200 },
-  {
-    field: "purchasedPrice",
-    headerName: "Purchased Price",
-    width: 200,
-    renderCell: (params) => {
-      const [newPrice, setNewPrice] = useState(params.row.purchasedPrice);
-      const mutation = trpc.updateProductPrice.useMutation({
-        onSuccess: () => {
-          // Reload the page after successfully creating a product
-          window.location.reload();
-        },
-      });
-
-      const handleAddPrice = () => {
-        console.log("New Purchased Price:", newPrice);
-        mutation.mutate({ productId: params.row.productId, amount: newPrice });
-      };
-
-      return (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            marginTop: "8px",
-          }}
-        >
-          <TextField
-            type="number"
-            size="small"
-            value={newPrice}
-            onChange={(e) => setNewPrice(Number(e.target.value))}
-            InputProps={{
-              startAdornment: "₹",
-            }}
-            style={{ width: "100px" }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={handleAddPrice}
-          >
-            Add
-          </Button>
-        </div>
-      );
-    },
-  },
-  {
-    field: "piecesPerQuantity",
-    headerName: "Pieces Per Quantity",
-    width: 120,
-    type: "number",
-    valueGetter: (value, row) => `${row.piecesPerQuantity}`,
-  },
-  {
-    field: "soldQuantity",
-    headerName: "Sold Quantity",
-    width: 120,
-    type: "number",
-    valueGetter: (value, row) => `${row.soldQuantity}`,
-  },
-  {
-    field: "expiredQuantity",
-    headerName: "Expired Quantity",
-    width: 120,
-    type: "number",
-    valueGetter: (value, row) => `${row.expiredQuantity}`,
-  },
-  {
-    field: "orderedProductBill",
-    headerName: "Product Bill",
-    width: 120,
-    type: "number",
-    valueGetter: (value, row) => `₹${row.orderedProductBill}`,
-  },
-  {
-    field: "orderedProductPrice",
-    headerName: "Product Price",
-    width: 120,
-    type: "number",
-    valueGetter: (value, row) => `₹${row.orderedProductPrice}`,
-  },
-  {
-    field: "totalProfitOnProduct",
-    headerName: "Product Profit",
-    width: 120,
-    type: "number",
-    valueGetter: (value, row) => `₹${row.totalProfitOnProduct}`,
-  },
-];
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const merchantColumns: GridColDef[] = [
   { field: "merchantId", headerName: "Merchant ID", width: 100 },
@@ -145,11 +52,13 @@ const Portfolio = () => {
     data: productData,
     error: productError,
     isLoading: productIsLoading,
+    refetch: productRefecth,
   } = trpc.getProducts.useQuery();
   const {
     data: orderData,
     error: orderError,
     isLoading: orderIsLoading,
+    refetch: orderRefecth,
   } = trpc.getOrdersWithProduct.useQuery();
 
   const productApiRef = useGridApiRef();
@@ -164,9 +73,6 @@ const Portfolio = () => {
 
   const [totalProductBill, setTotalProductBill] = useState(0);
   const [totalProductProfit, setTotalProductProfit] = useState(0);
-
-  dayjs.extend(isSameOrAfter);
-  dayjs.extend(isSameOrBefore);
 
   const handleDateRangeChange = (ranges: any) => {
     setDateRange([ranges.selection]);
@@ -349,6 +255,105 @@ const Portfolio = () => {
       setTotalProductProfit(totalProfit);
     }
   };
+
+  const productColumns: GridColDef[] = [
+    { field: "productId", headerName: "Product ID", width: 100 },
+    { field: "productName", headerName: "Product Name", width: 200 },
+    {
+      field: "purchasedPrice",
+      headerName: "Purchased Price",
+      width: 200,
+      renderCell: (params) => {
+        const [newPrice, setNewPrice] = useState(params.row.purchasedPrice);
+        const mutation = trpc.updateProductPrice.useMutation({
+          onSuccess: () => {
+            productRefecth();
+            orderRefecth();
+          },
+        });
+
+        const handleUpdatePrice = () => {
+          console.log("New Purchased Price:", newPrice);
+          mutation.mutate({
+            productId: params.row.productId,
+            amount: newPrice,
+          });
+        };
+
+        return (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginTop: "8px",
+            }}
+          >
+            <TextField
+              type="number"
+              size="small"
+              defaultValue={newPrice}
+              onBlur={(e) => setNewPrice(Number(e.target.value))}
+              InputProps={{
+                startAdornment: "₹",
+              }}
+              style={{ width: "100px" }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={handleUpdatePrice}
+            >
+              Add
+            </Button>
+          </div>
+        );
+      },
+    },
+    {
+      field: "piecesPerQuantity",
+      headerName: "Pieces Per Quantity",
+      width: 120,
+      type: "number",
+      valueGetter: (value, row) => `${row.piecesPerQuantity}`,
+    },
+    {
+      field: "soldQuantity",
+      headerName: "Sold Quantity",
+      width: 120,
+      type: "number",
+      valueGetter: (value, row) => `${row.soldQuantity}`,
+    },
+    {
+      field: "expiredQuantity",
+      headerName: "Expired Quantity",
+      width: 120,
+      type: "number",
+      valueGetter: (value, row) => `${row.expiredQuantity}`,
+    },
+    {
+      field: "orderedProductBill",
+      headerName: "Product Bill",
+      width: 120,
+      type: "number",
+      valueGetter: (value, row) => `₹${row.orderedProductBill}`,
+    },
+    {
+      field: "orderedProductPrice",
+      headerName: "Product Price",
+      width: 120,
+      type: "number",
+      valueGetter: (value, row) => `₹${row.orderedProductPrice}`,
+    },
+    {
+      field: "totalProfitOnProduct",
+      headerName: "Product Profit",
+      width: 120,
+      type: "number",
+      valueGetter: (value, row) => `₹${row.totalProfitOnProduct}`,
+    },
+  ];
 
   if (productIsLoading || orderIsLoading) {
     return <div className="py-4">Loading...</div>;

@@ -108,12 +108,14 @@ export const appRouter = t.router({
     .input(z.object({ productId: z.string(), amount: z.number() }))
     .mutation(async ({ input: { productId, amount } }) => {
       try {
-        await prisma.product.update({
+        const updatedProduct = await prisma.product.update({
           where: { productId },
           data: {
             purchasedPrice: amount,
           },
         });
+
+        return updatedProduct;
       } catch (error) {
         console.error("Error failed to update product price:", error);
         throw new TRPCError({
