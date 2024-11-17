@@ -66,7 +66,7 @@ const CardMerchantSummary = () => {
 
                 <div
                   className={`text-xs flex items-center font-medium ${
-                    merchant.balance > 0 ? "text-green-400" : "text-red-400"
+                    merchant.balance > 0 ? "text-green-500" : "text-red-500"
                   }`}
                 >
                   <button className="p-2 rounded-full bg-blue-100 text-blue-600 mr-2">
