@@ -4,6 +4,17 @@ import CreateProductModal from "./CreateProductModal";
 import { trpc } from "@/util";
 import Header from "@/components/header";
 import dayjs from "dayjs";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
+import { DateRangePicker } from "react-date-range";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
 type ProductFormData = {
   productId: string;
@@ -15,10 +26,20 @@ type ProductFormData = {
   expiryDate: Date;
 };
 
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dateRange, setDateRange] = useState([
+    { startDate: undefined, endDate: undefined, key: "selection" },
+  ]);
+  const [openDialog, setOpenDialog] = useState(false);
+
+  dayjs.extend(isSameOrAfter);
+  dayjs.extend(isSameOrBefore);
 
   const { data, isLoading, isError } = trpc.getProducts.useQuery(searchTerm);
   const mutation = trpc.createProduct.useMutation({
@@ -27,6 +48,16 @@ const Products = () => {
       window.location.reload();
     },
   });
+
+  const handleDateRangeChange = (ranges: any) => {
+    setDateRange([ranges.selection]);
+  };
+
+  const handleResetFilter = () => {
+    setDateRange([
+      { startDate: undefined, endDate: undefined, key: "selection" },
+    ]);
+  };
 
   const handleCreateProduct = (productData: ProductFormData) => {
     mutation.mutate({
@@ -39,10 +70,16 @@ const Products = () => {
   };
 
   const products = data?.products.filter((product) => {
-    const expiryDate = dayjs(product.expiryDate);
+    const purchasedDate = dayjs(product.createdAt);
+    const startDate = dateRange[0].startDate;
+    const endDate = dateRange[0].endDate;
     const today = dayjs();
 
-    return expiryDate.isAfter(today, "day") && product.currentQuantity !== 0;
+    return (
+      (!startDate || purchasedDate.isSameOrAfter(startDate, "day")) &&
+      (!endDate || purchasedDate.isSameOrBefore(endDate, "day")) &&
+      product.currentQuantity !== 0
+    );
   });
 
   useEffect(() => {
@@ -63,6 +100,22 @@ const Products = () => {
 
   return (
     <div className="mx-auto pb-5 w-full">
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Expired Filter</DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+            <DateRangePicker
+              ranges={dateRange}
+              onChange={handleDateRangeChange}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       {/* SEARCH BAR */}
       <div className="mb-6">
         <div className="flex items-center border-2 border-gray-200 rounded">
@@ -76,6 +129,23 @@ const Products = () => {
           />
         </div>
       </div>
+      {/* FILTER */}
+      <Box display="flex" gap={2} alignItems="center" padding={1}>
+        <Button
+          onClick={() => setOpenDialog(true)}
+          variant="contained"
+          color="primary"
+        >
+          Show Purchase Date Filter
+        </Button>
+        <Button
+          onClick={handleResetFilter}
+          color="secondary"
+          variant="outlined"
+        >
+          Reset Purchase Date Filter
+        </Button>
+      </Box>
 
       {/* HEADER BAR */}
       <div className="flex justify-between items-center mb-6">
@@ -121,6 +191,10 @@ const Products = () => {
                 </div>
                 <div className="text-sm text-gray-600 mt-1 font-semibold">
                   Stock: {product.currentQuantity}
+                </div>
+                <div className="text-sm text-gray-600 mt-1 font-semibold">
+                  Purchased Date:{" "}
+                  {product.createdAt.toLocaleDateString("en-GB")}
                 </div>
                 {/* {product.rating && (
                   <div className="flex items-center mt-2">

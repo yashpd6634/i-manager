@@ -60,6 +60,10 @@ const Merchants = () => {
       width: 200,
       type: "number",
       valueFormatter: (value) => `₹${value}`,
+      cellClassName: (params) =>
+        params.value < 0
+          ? "text-red-600 font-medium"
+          : "text-green-600 font-medium",
     },
     {
       field: "moneyTransfer",

@@ -44,6 +44,10 @@ const merchantColumns: GridColDef[] = [
     headerName: "Merchant Profit",
     width: 150,
     type: "number",
+    cellClassName: (params) =>
+      params.row.profitFromMerchant < 0
+        ? "text-red-600 font-bold"
+        : "text-green-600 font-bold",
   },
 ];
 
@@ -352,6 +356,10 @@ const Portfolio = () => {
       width: 120,
       type: "number",
       valueGetter: (value, row) => `₹${row.totalProfitOnProduct}`,
+      cellClassName: (params) =>
+        params.row.totalProfitOnProduct < 0
+          ? "text-red-600 font-bold"
+          : "text-green-600 font-bold",
     },
   ];
 

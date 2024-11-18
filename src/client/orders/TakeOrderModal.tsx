@@ -174,6 +174,19 @@ const TakeOrderModal = ({
         stockSource === "Godown"
           ? product.currentQuantity - product.inShopQuantity
           : product.inShopQuantity;
+
+      // Check if quantity exceeds available quantity and set warnings
+      if (newProducts[index].quantity > newProducts[index].availableQuantity) {
+        setWarnings((prev) => ({
+          ...prev,
+          [newProducts[index].productId]: "Quantity exceeds available stock!",
+        }));
+      } else {
+        setWarnings((prev) => {
+          const { [newProducts[index].productId]: _, ...rest } = prev;
+          return rest;
+        });
+      }
       setFormData({ ...formData, products: newProducts });
     }
   };
@@ -338,6 +351,7 @@ const TakeOrderModal = ({
                   <TableCell>Wholesale Price</TableCell>
                   <TableCell>Retail Price</TableCell>
                   <TableCell>Available Quantity</TableCell>
+                  {/* <TableCell>Expire Date</TableCell> */}
                   <TableCell>Stock Source</TableCell>
                   <TableCell>Remove</TableCell>
                 </TableRow>
