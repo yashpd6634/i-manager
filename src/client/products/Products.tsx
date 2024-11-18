@@ -41,11 +41,12 @@ const Products = () => {
   dayjs.extend(isSameOrAfter);
   dayjs.extend(isSameOrBefore);
 
-  const { data, isLoading, isError } = trpc.getProducts.useQuery(searchTerm);
+  const { data, isLoading, isError, refetch } =
+    trpc.getProducts.useQuery(searchTerm);
   const mutation = trpc.createProduct.useMutation({
     onSuccess: () => {
       // Reload the page after successfully creating a product
-      window.location.reload();
+      refetch();
     },
   });
 

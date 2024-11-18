@@ -8,7 +8,6 @@ import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "@/dashboard/Dashboard";
 import Wrapper from "./wrapper";
 import Inventory from "./inventory/Inventory";
-import Products from "./products/Products";
 import Merchants from "./merchants/Merchants";
 import Settings from "./settings/Settings";
 import Expenses from "./expenses/Expenses";
@@ -17,6 +16,7 @@ import Employees from "./employee/EmployeeDetails";
 import MerchantDetails from "./merchantDetails/MerchantDetails";
 import OrderDetails from "./orderDetails/OrderDetails";
 import PortfolioProtect from "./portfolio/ProtfolioProtect";
+import ProductsProtect from "./products/ProductsProtect";
 
 function App() {
   const [queryClient] = useState(
@@ -110,7 +110,7 @@ function App() {
             <Wrapper>
               <trpc.Provider client={trpcClient} queryClient={queryClient}>
                 <QueryClientProvider client={queryClient}>
-                  <Products />
+                  <ProductsProtect />
                 </QueryClientProvider>
               </trpc.Provider>
             </Wrapper>
