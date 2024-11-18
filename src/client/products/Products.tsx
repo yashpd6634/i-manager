@@ -73,7 +73,6 @@ const Products = () => {
     const purchasedDate = dayjs(product.createdAt);
     const startDate = dateRange[0].startDate;
     const endDate = dateRange[0].endDate;
-    const today = dayjs();
 
     return (
       (!startDate || purchasedDate.isSameOrAfter(startDate, "day")) &&

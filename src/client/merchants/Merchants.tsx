@@ -137,7 +137,17 @@ const Merchants = () => {
         rows={data.merchants}
         columns={columns}
         getRowId={(row) => row.merchantId}
-        slots={{ toolbar: GridToolbar }}
+        slots={{
+          toolbar: () => (
+            <GridToolbar
+              csvOptions={{
+                fileName: "Merchant data",
+                delimiter: ",",
+                utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+              }}
+            />
+          ),
+        }}
         slotProps={{
           toolbar: {
             showQuickFilter: true,

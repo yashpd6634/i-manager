@@ -314,7 +314,13 @@ const Inventory = () => {
           toolbar: () => (
             <Box display="flex" gap={2} alignItems="center" padding={1}>
               <GridToolbarQuickFilter />
-              <GridToolbar />
+              <GridToolbar
+                csvOptions={{
+                  fileName: "Product data",
+                  delimiter: ",",
+                  utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+                }}
+              />
               <Button
                 onClick={() => setOpenDialog(true)}
                 variant="contained"
@@ -347,7 +353,15 @@ const Inventory = () => {
           columns={columns}
           getRowId={(row) => row.productId}
           slots={{
-            toolbar: GridToolbar,
+            toolbar: () => (
+              <GridToolbar
+                csvOptions={{
+                  fileName: "Expired Product",
+                  delimiter: ",",
+                  utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+                }}
+              />
+            ),
           }}
           slotProps={{
             toolbar: {

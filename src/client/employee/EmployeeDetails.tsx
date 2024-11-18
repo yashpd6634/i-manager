@@ -76,7 +76,17 @@ const Employees = () => {
         rows={data.employees}
         columns={columns}
         getRowId={(row) => row.employeeId}
-        slots={{ toolbar: GridToolbar }}
+        slots={{
+          toolbar: () => (
+            <GridToolbar
+              csvOptions={{
+                fileName: "Employee Details",
+                delimiter: ",",
+                utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+              }}
+            />
+          ),
+        }}
         slotProps={{
           toolbar: {
             showQuickFilter: true,

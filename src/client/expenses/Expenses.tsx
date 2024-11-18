@@ -380,7 +380,13 @@ const Expenses = () => {
             toolbar: () => (
               <Box display="flex" gap={2} alignItems="center" padding={1}>
                 <GridToolbarQuickFilter />
-                <GridToolbar />
+                <GridToolbar
+                  csvOptions={{
+                    fileName: "Expenses data",
+                    delimiter: ",",
+                    utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+                  }}
+                />
                 <Button
                   onClick={() => setOpenFilter(true)}
                   variant="contained"

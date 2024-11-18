@@ -420,7 +420,13 @@ const Portfolio = () => {
           toolbar: () => (
             <Box display="flex" gap={2} alignItems="center" padding={1}>
               <GridToolbarQuickFilter />
-              <GridToolbar />
+              <GridToolbar
+                csvOptions={{
+                  fileName: "Portfolio based on product data",
+                  delimiter: ",",
+                  utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+                }}
+              />
               <Button
                 onClick={() => setOpenDialog(true)}
                 variant="contained"
@@ -484,7 +490,13 @@ const Portfolio = () => {
           toolbar: () => (
             <Box display="flex" gap={2} alignItems="center" padding={1}>
               <GridToolbarQuickFilter />
-              <GridToolbar />
+              <GridToolbar
+                csvOptions={{
+                  fileName: "Portfolio based on merchant data",
+                  delimiter: ",",
+                  utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+                }}
+              />
               <Button
                 onClick={() => setOpenDialog(true)}
                 variant="contained"

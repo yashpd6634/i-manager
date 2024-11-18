@@ -216,7 +216,13 @@ const OrderDetails = () => {
           toolbar: () => (
             <Box display="flex" gap={2} alignItems="center" padding={1}>
               <GridToolbarQuickFilter />
-              <GridToolbar />
+              <GridToolbar
+                csvOptions={{
+                  fileName: "Order details data",
+                  delimiter: ",",
+                  utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+                }}
+              />
             </Box>
           ),
         }}
