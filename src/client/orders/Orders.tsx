@@ -9,7 +9,7 @@ import {
   useGridApiRef,
 } from "@mui/x-data-grid";
 import { PlusCircleIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TakeOrderModal from "./TakeOrderModal";
 import dayjs from "dayjs";
 import {
@@ -52,7 +52,11 @@ const Orders = () => {
   const [openFilter, setOpenFilter] = useState(false);
   const [totalBill, setTotalBill] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
+  const [totalPaymentByUPI, setTotalPaymentByUPI] = useState(0);
+  const [totalPaymentByCash, setTotalPaymentByCash] = useState(0);
+  const [totalPaymentByCheck, setTotalPaymentByCheck] = useState(0);
   const apiRef = useGridApiRef();
+  const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const { data, error, isLoading } = trpc.getOrders.useQuery(); // Assuming you have a query that fetches orders with merchant data
@@ -75,9 +79,7 @@ const Orders = () => {
     );
   });
 
-  const calculateExpenses = (
-    apiRef: React.MutableRefObject<GridApiCommunity>
-  ) => {
+  const calculateBills = (apiRef: React.MutableRefObject<GridApiCommunity>) => {
     if (
       apiRef.current == null ||
       typeof apiRef.current.getAllRowIds !== "function"
@@ -88,6 +90,9 @@ const Orders = () => {
     const visibleRowIds = gridFilteredSortedRowIdsSelector(apiRef);
     let totalBill = 0;
     let totalPaid = 0;
+    let totalPaymentByUPI = 0;
+    let totalPaymentByCash = 0;
+    let totalPaymentByCheck = 0;
     const categoryAmounts: Record<
       string,
       { category: string; amount: number }
@@ -98,11 +103,17 @@ const Orders = () => {
       if (row) {
         totalBill += row.totalBill;
         totalPaid += row.totalPaid;
+        totalPaymentByUPI += row.paymentByUPI;
+        totalPaymentByCash += row.paymentByCash;
+        totalPaymentByCheck += row.paymentByCheck;
       }
     });
 
     setTotalBill(totalBill);
     setTotalPaid(totalPaid);
+    setTotalPaymentByUPI(totalPaymentByUPI);
+    setTotalPaymentByCash(totalPaymentByCash);
+    setTotalPaymentByCheck(totalPaymentByCheck);
   };
 
   const handleTakeOrder = (orderData: OrderFormData) => {
@@ -206,6 +217,10 @@ const Orders = () => {
     },
   ];
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [filteredProducts]);
+
   if (isLoading) {
     return <div className="py-4">Loading...</div>;
   }
@@ -249,6 +264,18 @@ const Orders = () => {
         <h4 className="text-cyan-600">Total Bill: ₹{totalBill} | </h4>
         <h4 className="text-lime-600">Total Paid: ₹{totalPaid}</h4>
       </div>
+      <hr className="mt-2 border-gray-800 border-1" />
+      <div className="flex mt-4 text-xl font-bold">
+        <h4 className="text-green-700">
+          Total Cash Payment: ₹{totalPaymentByCash} |{" "}
+        </h4>
+        <h4 className="text-violet-600">
+          Total UPI Payment: ₹{totalPaymentByUPI} |{" "}
+        </h4>
+        <h4 className="text-orange-500">
+          Total Check Payment: ₹{totalPaymentByCheck}
+        </h4>
+      </div>
       <Dialog open={openFilter} onClose={() => setOpenFilter(false)}>
         <DialogTitle>Order Filter</DialogTitle>
         <DialogContent>
@@ -274,7 +301,7 @@ const Orders = () => {
         slots={{
           toolbar: () => (
             <Box display="flex" gap={2} alignItems="center" padding={1}>
-              <GridToolbarQuickFilter />
+              <GridToolbarQuickFilter inputRef={inputRef} />
               <GridToolbar
                 csvOptions={{
                   fileName: "Orders",
@@ -314,7 +341,7 @@ const Orders = () => {
         }}
         checkboxSelection
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
-        onStateChange={() => calculateExpenses(apiRef)}
+        onStateChange={() => calculateBills(apiRef)}
       />
 
       <TakeOrderModal
