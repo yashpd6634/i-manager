@@ -34,6 +34,7 @@ type OrderFormData = {
     wholesalePrice: number;
     retailPrice: number;
     availableQuantity: number;
+    expiryDate: Date;
     stockSource: "Godown" | "Shop";
   }[];
   billId: string;
@@ -145,6 +146,7 @@ const TakeOrderModal = ({
       wholesalePrice: product.wholesalePrice,
       retailPrice: product.retailPrice,
       availableQuantity: godownQuantity,
+      expiryDate: product.expiryDate,
       stockSource: "Godown" as const,
     };
 
@@ -299,7 +301,7 @@ const TakeOrderModal = ({
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-full max-w-5xl shadow-lg rounded-md bg-white">
+      <div className="relative top-20 mx-auto p-5 border w-full max-w-7xl shadow-lg rounded-md bg-white">
         <Header name="Take New Order" />
         <form onSubmit={handleSubmit} className="mt-5">
           {/* Merchant Selection */}
@@ -351,7 +353,7 @@ const TakeOrderModal = ({
                   <TableCell>Wholesale Price</TableCell>
                   <TableCell>Retail Price</TableCell>
                   <TableCell>Available Quantity</TableCell>
-                  {/* <TableCell>Expire Date</TableCell> */}
+                  <TableCell>Expiry Date</TableCell>
                   <TableCell>Stock Source</TableCell>
                   <TableCell>Remove</TableCell>
                 </TableRow>
@@ -359,9 +361,9 @@ const TakeOrderModal = ({
               <TableBody>
                 {formData.products.map((product, index) => (
                   <TableRow key={product.productId}>
-                    <TableCell>{product.productId}</TableCell>
-                    <TableCell>{product.name}</TableCell>
-                    <TableCell sx={{ width: 150 }}>
+                    <TableCell sx={{ width: 5 }}>{product.productId}</TableCell>
+                    <TableCell sx={{ width: 5 }}>{product.name}</TableCell>
+                    <TableCell sx={{ maxWidth: 150 }}>
                       <TextField
                         type="number"
                         value={product.quantity}
@@ -383,7 +385,7 @@ const TakeOrderModal = ({
                         </div>
                       )}
                     </TableCell>
-                    <TableCell sx={{ width: 150 }}>
+                    <TableCell sx={{ maxWidth: 150 }}>
                       <TextField
                         type="number"
                         value={product.soldPrice}
@@ -405,6 +407,9 @@ const TakeOrderModal = ({
                       ₹{product.retailPrice * product.quantity}
                     </TableCell>
                     <TableCell>{product.availableQuantity}</TableCell>
+                    <TableCell>
+                      {product.expiryDate.toLocaleDateString("en-GB")}
+                    </TableCell>
                     <TableCell>
                       <FormControl fullWidth>
                         <InputLabel>Stock Source</InputLabel>
