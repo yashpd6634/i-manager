@@ -153,6 +153,29 @@ export const appRouter = t.router({
         });
       }
     }),
+  getProduct: t.procedure
+    .input(
+      z.object({
+        productId: z.string(),
+      })
+    )
+    .query(async ({ input: { productId } }) => {
+      try {
+        const product = await prisma.product.findUnique({
+          where: {
+            productId: productId,
+          },
+        });
+
+        return product;
+      } catch (error) {
+        console.error("Error while retrieving product: ", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to retrieve product",
+        });
+      }
+    }),
   createProduct: t.procedure
     .input(
       z.object({
@@ -194,6 +217,53 @@ export const appRouter = t.router({
           return products;
         } catch (error) {
           console.log("Error creating products", error);
+        }
+      }
+    ),
+  updateProduct: t.procedure
+    .input(
+      z.object({
+        productId: z.string(),
+        name: z.string(),
+        piecesPerQuantity: z.number(),
+        wholesalePrice: z.number(),
+        retailPrice: z.number(),
+        purchasedQuantity: z.number(),
+        expiryDate: z.date(),
+      })
+    )
+    .mutation(
+      async ({
+        input: {
+          productId,
+          name,
+          piecesPerQuantity,
+          wholesalePrice,
+          retailPrice,
+          purchasedQuantity,
+          expiryDate,
+        },
+      }) => {
+        try {
+          const updatedProduct = await prisma.product.update({
+            where: { productId },
+            data: {
+              name,
+              piecesPerQuantity,
+              wholesalePrice,
+              retailPrice,
+              purchasedQuantity,
+              expiryDate,
+            },
+          });
+
+          return updatedProduct;
+        } catch (error) {
+          console.error("Error failed to update product price:", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to update product price",
+          });
         }
       }
     ),

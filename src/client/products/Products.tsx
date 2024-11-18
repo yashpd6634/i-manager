@@ -15,6 +15,7 @@ import {
 import { DateRangePicker } from "react-date-range";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import UpdateProductModal from "./UpdateProductModal";
 
 type ProductFormData = {
   productId: string;
@@ -32,18 +33,26 @@ dayjs.extend(isSameOrBefore);
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [dateRange, setDateRange] = useState([
     { startDate: undefined, endDate: undefined, key: "selection" },
   ]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [updateProductId, setUpdateProductId] = useState("");
 
   dayjs.extend(isSameOrAfter);
   dayjs.extend(isSameOrBefore);
 
   const { data, isLoading, isError, refetch } =
     trpc.getProducts.useQuery(searchTerm);
-  const mutation = trpc.createProduct.useMutation({
+  const createMutation = trpc.createProduct.useMutation({
+    onSuccess: () => {
+      // Reload the page after successfully creating a product
+      refetch();
+    },
+  });
+  const updateMutation = trpc.updateProduct.useMutation({
     onSuccess: () => {
       // Reload the page after successfully creating a product
       refetch();
@@ -61,7 +70,17 @@ const Products = () => {
   };
 
   const handleCreateProduct = (productData: ProductFormData) => {
-    mutation.mutate({
+    createMutation.mutate({
+      ...productData,
+      wholesalePrice: parseFloat(
+        parseFloat(productData.wholesalePrice).toFixed(2)
+      ),
+      retailPrice: parseFloat(parseFloat(productData.retailPrice).toFixed(2)),
+    });
+  };
+
+  const handleUpdateProduct = (productData: ProductFormData) => {
+    updateMutation.mutate({
       ...productData,
       wholesalePrice: parseFloat(
         parseFloat(productData.wholesalePrice).toFixed(2)
@@ -192,10 +211,20 @@ const Products = () => {
                 <div className="text-sm text-gray-600 mt-1 font-semibold">
                   Stock: {product.currentQuantity}
                 </div>
-                <div className="text-sm text-gray-600 mt-1 font-semibold">
+                <div className="text-sm text-gray-600 mt-1 mb-2 font-semibold">
                   Purchased Date:{" "}
                   {product.createdAt.toLocaleDateString("en-GB")}
                 </div>
+                <Button
+                  onClick={() => {
+                    setUpdateProductId(product.productId);
+                    setIsUpdateModalOpen(true);
+                  }}
+                  color="warning"
+                  variant="contained"
+                >
+                  <div className="font-bold">Update</div>
+                </Button>
                 {/* {product.rating && (
                   <div className="flex items-center mt-2">
                     <Rating rating={product.rating} />
@@ -212,6 +241,12 @@ const Products = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreateProduct}
+      />
+      <UpdateProductModal
+        productId={updateProductId}
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        onUpdate={handleUpdateProduct}
       />
     </div>
   );
