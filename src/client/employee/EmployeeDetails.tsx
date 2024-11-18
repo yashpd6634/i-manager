@@ -72,6 +72,12 @@ const Employees = () => {
         </button>
       </div>
       <DataGrid
+        pageSizeOptions={[15, 30, 50, 100]} // Custom page size options
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 15 }, // Set default page size to 10
+          },
+        }}
         disableColumnSelector
         rows={data.employees}
         columns={columns}

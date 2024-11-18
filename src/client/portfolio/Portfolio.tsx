@@ -411,6 +411,12 @@ const Portfolio = () => {
         </DialogActions>
       </Dialog>
       <DataGrid
+        pageSizeOptions={[15, 30, 50, 100]} // Custom page size options
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 15 }, // Set default page size to 10
+          },
+        }}
         apiRef={productApiRef}
         disableColumnSelector
         rows={productTableData}
@@ -481,6 +487,12 @@ const Portfolio = () => {
         </DialogActions>
       </Dialog>
       <DataGrid
+        pageSizeOptions={[15, 30, 50, 100]} // Custom page size options
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 15 }, // Set default page size to 10
+          },
+        }}
         apiRef={merchantApiRef}
         disableColumnSelector
         rows={merchantData}

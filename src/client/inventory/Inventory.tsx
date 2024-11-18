@@ -343,11 +343,23 @@ const Inventory = () => {
             showQuickFilter: true,
           },
         }}
+        pageSizeOptions={[15, 30, 50, 100]} // Custom page size options
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 15 }, // Set default page size to 10
+          },
+        }}
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />
       <div className="mt-4">
         <Header name="Expired Products" />
         <DataGrid
+          pageSizeOptions={[15, 30, 50, 100]} // Custom page size options
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 15 }, // Set default page size to 10
+            },
+          }}
           disableColumnSelector
           rows={expiredProducts}
           columns={columns}
