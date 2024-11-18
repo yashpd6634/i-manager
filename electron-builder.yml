@@ -71,5 +71,3 @@ mac:
   hardenedRuntime: true
   asarUnpack: # only if you need to run prisma migrate:
     - prisma
-nsis:
-  deleteAppDataOnUninstall: true
