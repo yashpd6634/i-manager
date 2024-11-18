@@ -112,6 +112,13 @@ const MoneyTransactions = () => {
       valueGetter: (value, row) => `${row.merchant.location}`,
     },
     {
+      field: "transactionOn",
+      headerName: "Transaction On",
+      width: 200,
+      valueGetter: (value, row) =>
+        `${row.transactionDate.toLocaleDateString("en-US")}`,
+    },
+    {
       field: "paymentType",
       headerName: "Payment Type",
       width: 150,
