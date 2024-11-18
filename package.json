@@ -16,6 +16,7 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.13.0",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^22.8.7",
     "@types/numeral": "^2.0.5",
     "@types/os-utils": "^0.0.4",
@@ -53,6 +54,7 @@
     "@mui/material": "^6.1.6",
     "@mui/x-data-grid": "^7.22.1",
     "@prisma/client": "^5.21.1",
+    "@react-pdf/renderer": "^4.1.4",
     "@reduxjs/toolkit": "^2.3.0",
     "@tanstack/react-query": "^5.59.19",
     "@trpc/client": "11.0.0-rc.421",
@@ -63,6 +65,7 @@
     "dotenv": "^16.4.5",
     "electron-log": "^5.2.0",
     "electron-store": "^10.0.0",
+    "file-saver": "^2.0.5",
     "fix-esm": "^1.0.1",
     "lucide-react": "^0.454.0",
     "numeral": "^2.0.6",

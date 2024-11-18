@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useRef, useState } from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
 import { trpc } from "@/util";
@@ -22,8 +22,12 @@ import {
 } from "@mui/material";
 import { CircleX } from "lucide-react";
 import dayjs from "dayjs";
+import { pdf, PDFDownloadLink } from "@react-pdf/renderer";
+import GenerateBill from "./GenerateBill";
+import { File } from "lucide-react";
+import { saveAs } from "file-saver";
 
-type OrderFormData = {
+export type OrderFormData = {
   orderId: string;
   merchantId: string;
   products: {
@@ -264,6 +268,19 @@ const TakeOrderModal = ({
     }
   };
 
+  const generatePdfDocument = async () => {
+    const blob = await pdf(
+      <GenerateBill
+        orderData={formData}
+        merchantData={merchantData?.merchants}
+      />
+    ).toBlob();
+    saveAs(
+      blob,
+      `Order-${new Date().toLocaleDateString("en-GB")}-${formData.orderId}`
+    );
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -302,7 +319,19 @@ const TakeOrderModal = ({
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-20 mx-auto p-5 border w-full max-w-7xl shadow-lg rounded-md bg-white">
-        <Header name="Take New Order" />
+        <div className="flex justify-between">
+          <Header name="Take New Order" />
+          {/* <PDFDownloadLink document={<GenerateBill />} fileName="invoice.pdf"> */}
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={generatePdfDocument}
+          >
+            <File className="m-2" />
+            Generate Bill
+          </Button>
+          {/* </PDFDownloadLink> */}
+        </div>
         <form onSubmit={handleSubmit} className="mt-5">
           {/* Merchant Selection */}
           <Autocomplete

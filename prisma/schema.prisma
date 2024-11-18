@@ -52,7 +52,7 @@ model Order {
   orderedProducts OrderedProduct[]
   orderDate       DateTime         @default(now())
 
-  billId            String
+  billId            String?
   billGeneratedById String
   billGeneratedBy   Employee @relation(fields: [billGeneratedById], references: [employeeId], onDelete: Cascade)
 
