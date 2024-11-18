@@ -1,8 +1,8 @@
 import path from "path";
-import {app} from "electron";
+import { app } from "electron";
 
 export const isDev = process.env.NODE_ENV === "development";
-export const dbPath = path.join(app.getPath('userData'), "app.db");
+export const dbPath = path.join(app.getPath("userData"), "app.db");
 console.log("DB Path", dbPath);
 export const dbUrl = isDev ? process.env.DATABASE_URL! : "file:" + dbPath;
 
@@ -12,26 +12,30 @@ export const dbUrl = isDev ? process.env.DATABASE_URL! : "file:" + dbPath;
 process.env.DATABASE_URL = dbUrl;
 
 // This needs to be updated every time you create a migration!
-export const latestMigration = "20241104021719_init";
+export const latestMigration = "20241118133552_updated_money_transaction_model";
 export const platformToExecutables: any = {
   win32: {
-    migrationEngine: 'node_modules/@prisma/engines/schema-engine-windows.exe',
-    queryEngine: 'node_modules/@prisma/engines/query_engine-windows.dll.node',
+    migrationEngine: "node_modules/@prisma/engines/schema-engine-windows.exe",
+    queryEngine: "node_modules/@prisma/engines/query_engine-windows.dll.node",
   },
   linux: {
-    migrationEngine: 'node_modules/@prisma/engines/schema-engine-debian-openssl-1.1.x',
-    queryEngine: 'node_modules/@prisma/engines/libquery_engine-debian-openssl-1.1.x.so.node'
+    migrationEngine:
+      "node_modules/@prisma/engines/schema-engine-debian-openssl-1.1.x",
+    queryEngine:
+      "node_modules/@prisma/engines/libquery_engine-debian-openssl-1.1.x.so.node",
   },
   darwin: {
-    migrationEngine: 'node_modules/@prisma/engines/schema-engine-darwin',
-    queryEngine: 'node_modules/@prisma/engines/libquery_engine-darwin.dylib.node'
+    migrationEngine: "node_modules/@prisma/engines/schema-engine-darwin",
+    queryEngine:
+      "node_modules/@prisma/engines/libquery_engine-darwin.dylib.node",
   },
   darwinArm64: {
-    migrationEngine: 'node_modules/@prisma/engines/schema-engine-darwin-arm64',
-    queryEngine: 'node_modules/@prisma/engines/libquery_engine-darwin-arm64.dylib.node',
-  }
+    migrationEngine: "node_modules/@prisma/engines/schema-engine-darwin-arm64",
+    queryEngine:
+      "node_modules/@prisma/engines/libquery_engine-darwin-arm64.dylib.node",
+  },
 };
-const extraResourcesPath = app.getAppPath().replace('app.asar', ''); // impacted by extraResources setting in electron-builder.yml
+const extraResourcesPath = app.getAppPath().replace("app.asar", ""); // impacted by extraResources setting in electron-builder.yml
 
 function getPlatformName(): string {
   const isDarwin = process.platform === "darwin";
@@ -53,7 +57,6 @@ export const qePath = path.join(
   platformToExecutables[platformName].queryEngine
 );
 
-
 export interface Migration {
   id: string;
   checksum: string;
@@ -64,4 +67,3 @@ export interface Migration {
   started_at: string;
   applied_steps_count: string;
 }
-
