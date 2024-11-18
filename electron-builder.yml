@@ -41,7 +41,7 @@ win:
     smartUnpack: false
   asarUnpack: # only if you need to run prisma migrate:
     - prisma
-  signingHashAlgorithms: [ 'sha256' ]
+  signingHashAlgorithms: ["sha256"]
   publisherName: PM Trade World
   signAndEditExecutable: true
   verifyUpdateCodeSignature: true
@@ -71,4 +71,5 @@ mac:
   hardenedRuntime: true
   asarUnpack: # only if you need to run prisma migrate:
     - prisma
-
+nsis:
+  deleteAppDataOnUninstall: true
