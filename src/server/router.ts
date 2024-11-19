@@ -761,10 +761,16 @@ export const appRouter = t.router({
         }
       }
     ),
-  checkPassword: t.procedure
+  checkPasswordPortfolio: t.procedure
     .input(z.object({ password: z.string() }))
     .mutation(async ({ input: { password } }) => {
       const originalPassword = "Yash0285";
+      return { success: password === originalPassword };
+    }),
+  checkPasswordProduct: t.procedure
+    .input(z.object({ password: z.string() }))
+    .mutation(async ({ input: { password } }) => {
+      const originalPassword = "Ajay1976";
       return { success: password === originalPassword };
     }),
 });

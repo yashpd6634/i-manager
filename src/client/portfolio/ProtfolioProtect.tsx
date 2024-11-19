@@ -18,7 +18,7 @@ const PortfolioProtect = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const navigate = useNavigate();
-  const checkPassword = trpc.checkPassword.useMutation();
+  const checkPassword = trpc.checkPasswordPortfolio.useMutation();
 
   const handlePasswordSubmit = async () => {
     const response = await checkPassword.mutateAsync({ password });

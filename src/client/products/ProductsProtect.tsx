@@ -18,7 +18,7 @@ const ProductsProtect = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const navigate = useNavigate();
-  const checkPassword = trpc.checkPassword.useMutation();
+  const checkPassword = trpc.checkPasswordProduct.useMutation();
 
   const handlePasswordSubmit = async () => {
     const response = await checkPassword.mutateAsync({ password });
