@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import {
   Box,
@@ -30,7 +30,7 @@ const CreateProductModal = ({
   onClose,
   onCreate,
 }: CreateProductModalProps) => {
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     productId: v4(),
     name: "",
     piecesPerQuantity: 0,
@@ -38,7 +38,15 @@ const CreateProductModal = ({
     retailPrice: "",
     purchasedQuantity: 0,
     expiryDate: new Date(),
-  });
+  };
+
+  const [formData, setFormData] = useState<ProductFormData>(initialFormState);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialFormState); // Reset form data when the modal opens
+    }
+  }, [isOpen]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

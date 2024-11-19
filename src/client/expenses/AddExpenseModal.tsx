@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
 import {
@@ -29,13 +29,21 @@ type AddExpenseModalProps = {
 };
 
 const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     expenseId: v4(),
     category: "",
     amount: "",
     expendDate: new Date(),
     description: "",
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialFormState); // Reset form data when the modal opens
+    }
+  }, [isOpen]);
 
   const handleChange = (
     e:
@@ -61,13 +69,6 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd }: AddExpenseModalProps) => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onAdd(formData);
-    setFormData({
-      expenseId: "",
-      category: "",
-      amount: "",
-      expendDate: new Date(),
-      description: "",
-    });
     onClose();
   };
 

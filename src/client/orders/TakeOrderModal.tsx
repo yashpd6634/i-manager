@@ -1,4 +1,10 @@
-import React, { ChangeEvent, FormEvent, useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
 import { trpc } from "@/util";
@@ -82,7 +88,7 @@ const TakeOrderModal = ({
   onClose,
   onCreate,
 }: CreateOrderModalProps) => {
-  const [formData, setFormData] = useState<OrderFormData>({
+  const initialFormState = {
     orderId: v4(),
     merchantId: "",
     products: [],
@@ -94,7 +100,16 @@ const TakeOrderModal = ({
     accountType: "None",
     totalBill: 0,
     totalPaid: 0,
-  });
+  };
+
+  const [formData, setFormData] = useState<OrderFormData>(initialFormState);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialFormState); // Reset form data when the modal opens
+    }
+  }, [isOpen]);
+
   const [warnings, setWarnings] = useState<{ [key: string]: string }>({});
 
   const { data: merchantData, isLoading: isMerchantsLoading } =
@@ -298,19 +313,6 @@ const TakeOrderModal = ({
     };
 
     onCreate(filteredFormData);
-    setFormData({
-      orderId: "",
-      merchantId: "",
-      products: [],
-      billId: "",
-      billGeneratedById: "",
-      paymentByUPI: 0,
-      paymentByCheck: 0,
-      paymentByCash: 0,
-      accountType: "None",
-      totalBill: 0,
-      totalPaid: 0,
-    });
     onClose();
   };
 

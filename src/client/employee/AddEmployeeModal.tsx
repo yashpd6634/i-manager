@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
 import {
@@ -30,14 +30,22 @@ const CreateEmployeeModal = ({
   onClose,
   onCreate,
 }: CreateEmployeeModalProps) => {
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     employeeId: v4(),
     name: "",
     phoneNumber: "",
     role: "",
     location: "",
     joinedDate: new Date(),
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialFormState); // Reset form data when the modal opens
+    }
+  }, [isOpen]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

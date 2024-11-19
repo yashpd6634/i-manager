@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import Header from "@/components/header";
 import {
@@ -29,13 +29,21 @@ const CreateMerchantModal = ({
   onClose,
   onCreate,
 }: CreateMerchantModalProps) => {
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     merchantId: v4(),
     name: "",
     phoneNumber: "",
     location: "",
     balance: 0,
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialFormState); // Reset form data when the modal opens
+    }
+  }, [isOpen]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
