@@ -14,7 +14,7 @@ import {
   SelectChangeEvent,
   TextField,
 } from "@mui/material";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { v4 } from "uuid";
 
 type TransactionFormData = {
@@ -40,7 +40,7 @@ export const MoneyTransfer = ({
   setBalance: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState<TransactionFormData>({
+  const initialFormState = {
     transactionId: v4(),
     merchantId: merchantId,
     paymentType: "Add",
@@ -51,7 +51,16 @@ export const MoneyTransfer = ({
     accountType: "None",
     totalAmount: 0,
     description: "",
-  });
+  };
+
+  const [formData, setFormData] =
+    useState<TransactionFormData>(initialFormState);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      setFormData(initialFormState); // Reset form data when the modal opens
+    }
+  }, [isModalOpen]);
 
   const mutation = trpc.paidMoneyTransaction.useMutation({
     onSuccess: () => {
