@@ -111,12 +111,12 @@ const GenerateBill = ({
   const Address = () => (
     <View style={styles.titleContainer}>
       <View style={styles.spaceBetween}>
-        <View style={{ marginTop: 5 }}>
+        {/* <View style={{ marginTop: 5 }}>
           <Text style={styles.addressTitle}>Near rahul sweets, </Text>
           <Text style={styles.addressTitle}>Dongargaon,</Text>
           <Text style={styles.addressTitle}>Rajnandgaon, Chhattisgarh.</Text>
           <Text style={styles.addressTitle}>Contact: 6263957572</Text>
-        </View>
+        </View> */}
         <View>
           <Text style={styles.invoice}>Order Bill </Text>
           <Text style={styles.invoiceNumber}>
@@ -212,7 +212,6 @@ const GenerateBill = ({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <InvoiceTitle />
         <Address />
         <UserAddress />
         <TableHead />
