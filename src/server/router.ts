@@ -254,6 +254,7 @@ export const appRouter = t.router({
               retailPrice,
               purchasedQuantity,
               expiryDate,
+              currentQuantity: purchasedQuantity,
             },
           });
 
