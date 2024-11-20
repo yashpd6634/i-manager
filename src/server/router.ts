@@ -245,6 +245,19 @@ export const appRouter = t.router({
         },
       }) => {
         try {
+          const product = await prisma.product.findUnique({
+            where: {
+              productId,
+            },
+          });
+
+          if (product?.purchasedQuantity !== product?.currentQuantity) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Cannot update product after order has been done",
+            });
+          }
+
           const updatedProduct = await prisma.product.update({
             where: { productId },
             data: {
@@ -260,10 +273,10 @@ export const appRouter = t.router({
 
           return updatedProduct;
         } catch (error) {
-          console.error("Error failed to update product price:", error);
+          console.error("Error failed to update product:", error);
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to update product price",
+            message: "Failed to update product",
           });
         }
       }
