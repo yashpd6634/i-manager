@@ -175,10 +175,17 @@ const TakeOrderModal = ({
     }));
 
     // Clear any warnings for this product as it’s added successfully
-    setWarnings((prev) => {
-      const { [product.productId]: _, ...rest } = prev;
-      return rest;
-    });
+    if (newProduct.availableQuantity < newProduct.quantity) {
+      setWarnings((prev) => ({
+        ...prev,
+        [newProduct.productId]: "Quantity exceeds available stock!",
+      }));
+    } else {
+      setWarnings((prev) => {
+        const { [newProduct.productId]: _, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const handleSourceChange = (
@@ -212,25 +219,22 @@ const TakeOrderModal = ({
     }
   };
 
-  const handleProductChange = (index: number, field: string, value: string) => {
+  const handleProductChange = (index: number, field: string, val: string) => {
     const newProducts = [...formData.products];
-    const quantity = parseFloat(value);
+    const value = parseFloat(val);
 
     newProducts[index] = {
       ...newProducts[index],
-      [field]: quantity,
+      [field]: value,
     };
 
     // Check if quantity exceeds available quantity and set warnings
-    if (
-      field === "quantity" &&
-      quantity > newProducts[index].availableQuantity
-    ) {
+    if (field === "quantity" && value > newProducts[index].availableQuantity) {
       setWarnings((prev) => ({
         ...prev,
         [newProducts[index].productId]: "Quantity exceeds available stock!",
       }));
-    } else {
+    } else if (field === "quantity") {
       setWarnings((prev) => {
         const { [newProducts[index].productId]: _, ...rest } = prev;
         return rest;
@@ -301,6 +305,7 @@ const TakeOrderModal = ({
 
     const filteredFormData = {
       ...formData,
+      totalBill: Math.ceil(formData.totalBill),
       products: formData.products.map(
         ({ productId, name, quantity, soldPrice, stockSource }) => ({
           productId,
@@ -320,7 +325,7 @@ const TakeOrderModal = ({
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-full max-w-7xl shadow-lg rounded-md bg-white">
+      <div className="relative top-20 mx-auto p-5 border w-full max-w-screen-xl shadow-lg rounded-md bg-white">
         <div className="flex justify-between">
           <Header name="Take New Order" />
           {/* <PDFDownloadLink document={<GenerateBill />} fileName="invoice.pdf"> */}
@@ -380,6 +385,7 @@ const TakeOrderModal = ({
                   <TableCell>Product ID</TableCell>
                   <TableCell>Product Name</TableCell>
                   <TableCell>Buying Quantity</TableCell>
+                  <TableCell>Selling Price per quantity</TableCell>
                   <TableCell>Selling Price</TableCell>
                   <TableCell>Wholesale Price</TableCell>
                   <TableCell>Retail Price</TableCell>
@@ -432,6 +438,9 @@ const TakeOrderModal = ({
                       />
                     </TableCell>
                     <TableCell>
+                      ₹{product.soldPrice * product.quantity}
+                    </TableCell>
+                    <TableCell>
                       ₹{product.wholesalePrice * product.quantity}
                     </TableCell>
                     <TableCell>
@@ -463,14 +472,18 @@ const TakeOrderModal = ({
                       <Button
                         variant="text"
                         color="secondary"
-                        onClick={() =>
+                        onClick={() => {
+                          setWarnings((prev) => {
+                            const { [product.productId]: _, ...rest } = prev;
+                            return rest;
+                          });
                           setFormData((prev) => ({
                             ...prev,
                             products: prev.products.filter(
                               (_, i) => i !== index
                             ),
-                          }))
-                        }
+                          }));
+                        }}
                       >
                         <CircleX />
                       </Button>
