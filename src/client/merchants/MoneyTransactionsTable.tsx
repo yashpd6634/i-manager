@@ -115,8 +115,13 @@ const MoneyTransactions = () => {
       field: "transactionOn",
       headerName: "Transaction On",
       width: 200,
-      valueGetter: (value, row) =>
-        `${row.transactionDate.toLocaleDateString("en-US")}`,
+      valueGetter: (value, row) => new Date(row.transactionDate),
+      valueFormatter: (value) => {
+        const date = value as Date;
+        return date
+          ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
+          : ""; // Format the date and time
+      },
     },
     {
       field: "paymentType",
@@ -228,6 +233,9 @@ const MoneyTransactions = () => {
         initialState={{
           pagination: {
             paginationModel: { pageSize: 15 }, // Set default page size to 10
+          },
+          sorting: {
+            sortModel: [{ field: "transactionOn", sort: "desc" }],
           },
         }}
         disableColumnSelector

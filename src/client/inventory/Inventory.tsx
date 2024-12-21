@@ -348,6 +348,9 @@ const Inventory = () => {
           pagination: {
             paginationModel: { pageSize: 15 }, // Set default page size to 10
           },
+          sorting: {
+            sortModel: [{ field: "createdAt", sort: "desc" }],
+          },
         }}
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />
@@ -358,6 +361,9 @@ const Inventory = () => {
           initialState={{
             pagination: {
               paginationModel: { pageSize: 15 }, // Set default page size to 10
+            },
+            sorting: {
+              sortModel: [{ field: "expiryDate", sort: "desc" }],
             },
           }}
           disableColumnSelector

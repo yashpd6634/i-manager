@@ -48,6 +48,7 @@ export type OrderFormData = {
     stockSource: "Godown" | "Shop";
   }[];
   billId: string;
+  orderDate: Date;
   billGeneratedById: string;
   paymentByUPI: number;
   paymentByCheck: number;
@@ -68,6 +69,7 @@ type SubmitOrderFormData = {
     stockSource: "Godown" | "Shop";
   }[];
   billId: string;
+  orderDate: Date;
   billGeneratedById: string;
   paymentByUPI: number;
   paymentByCheck: number;
@@ -94,6 +96,7 @@ const TakeOrderModal = ({
     products: [],
     billId: "",
     billGeneratedById: "",
+    orderDate: new Date(),
     paymentByUPI: 0,
     paymentByCheck: 0,
     paymentByCash: 0,
@@ -300,6 +303,18 @@ const TakeOrderModal = ({
     );
   };
 
+  const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: name === "orderDate" ? new Date(value) : value,
+    });
+  };
+
+  const formattedBillingDate = formData.orderDate
+    ? formData.orderDate.toISOString().split("T")[0]
+    : "";
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -364,7 +379,9 @@ const TakeOrderModal = ({
             className="my-4"
             options={filteredProductData || []}
             getOptionLabel={(option) =>
-              `${option.name} (ID - ${option.productId})` || ""
+              `${option.name} (Expired on - ${dayjs(option.expiryDate).format(
+                "DD/MM/YYYY"
+              )}) (Id - ${option.productId})` || ""
             }
             onChange={(event, value) => value && handleAddProduct(value)}
             renderInput={(params) => (
@@ -510,6 +527,21 @@ const TakeOrderModal = ({
             />
           </div>
 
+          {/* Order Date */}
+          <TextField
+            label="Order Date"
+            name="orderDate"
+            type="date"
+            onChange={handleDateChange}
+            value={formattedBillingDate}
+            fullWidth
+            required
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+
           {/* Employee Selection */}
           <Autocomplete
             options={employeeData?.employees || []}
@@ -613,6 +645,7 @@ const TakeOrderModal = ({
                   merchantId: "",
                   products: [],
                   billId: "",
+                  orderDate: new Date(),
                   billGeneratedById: "",
                   paymentByUPI: 0,
                   paymentByCheck: 0,

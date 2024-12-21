@@ -474,6 +474,7 @@ export const appRouter = t.router({
           })
         ),
         billId: z.string(),
+        orderDate: z.date(),
         billGeneratedById: z.string(),
         paymentByUPI: z.number(),
         paymentByCheck: z.number(),
@@ -490,6 +491,7 @@ export const appRouter = t.router({
           merchantId,
           products,
           billId,
+          orderDate,
           billGeneratedById,
           paymentByUPI,
           paymentByCheck,
@@ -508,6 +510,7 @@ export const appRouter = t.router({
                 orderId,
                 merchantId,
                 billId,
+                orderDate,
                 billGeneratedById,
                 paymentByUPI,
                 paymentByCheck,

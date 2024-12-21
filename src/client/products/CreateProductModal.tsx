@@ -37,7 +37,11 @@ const CreateProductModal = ({
     wholesalePrice: "",
     retailPrice: "",
     purchasedQuantity: 0,
-    expiryDate: new Date(),
+    expiryDate: (() => {
+      const date = new Date();
+      date.setMonth(date.getMonth() + 3);
+      return date;
+    })(),
   };
 
   const [formData, setFormData] = useState<ProductFormData>(initialFormState);

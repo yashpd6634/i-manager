@@ -376,6 +376,9 @@ const Expenses = () => {
             pagination: {
               paginationModel: { pageSize: 15 }, // Set default page size to 10
             },
+            sorting: {
+              sortModel: [{ field: "expendDate", sort: "desc" }],
+            },
           }}
           disableColumnSelector
           rows={filteredProducts}

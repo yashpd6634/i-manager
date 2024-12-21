@@ -1,7 +1,12 @@
 import Header from "@/components/header";
 import { trpc } from "@/util";
-import { Button, TextField } from "@mui/material";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import { Box, Button, TextField } from "@mui/material";
+import {
+  DataGrid,
+  GridColDef,
+  GridToolbar,
+  GridToolbarQuickFilter,
+} from "@mui/x-data-grid";
 import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import AddMerchantModal from "./AddMerchantModal";
@@ -138,6 +143,9 @@ const Merchants = () => {
           pagination: {
             paginationModel: { pageSize: 15 }, // Set default page size to 10
           },
+          sorting: {
+            sortModel: [{ field: "updatedAt", sort: "desc" }],
+          },
         }}
         disableColumnSelector
         rows={data.merchants}
@@ -145,13 +153,16 @@ const Merchants = () => {
         getRowId={(row) => row.merchantId}
         slots={{
           toolbar: () => (
-            <GridToolbar
-              csvOptions={{
-                fileName: "Merchant data",
-                delimiter: ",",
-                utf8WithBom: true, // Ensures proper encoding for ₹ symbol
-              }}
-            />
+            <Box display="flex" gap={2} alignItems="center" padding={1}>
+              <GridToolbarQuickFilter />
+              <GridToolbar
+                csvOptions={{
+                  fileName: "Merchant data",
+                  delimiter: ",",
+                  utf8WithBom: true, // Ensures proper encoding for ₹ symbol
+                }}
+              />
+            </Box>
           ),
         }}
         slotProps={{

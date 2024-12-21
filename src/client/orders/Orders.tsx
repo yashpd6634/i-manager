@@ -35,6 +35,7 @@ type OrderFormData = {
     stockSource: "Godown" | "Shop";
   }[];
   billId: string;
+  orderDate: Date;
   billGeneratedById: string;
   paymentByUPI: number;
   paymentByCheck: number;
@@ -215,6 +216,19 @@ const Orders = () => {
       valueGetter: (value, row) =>
         `₹${row.paymentByUPI + row.paymentByCash + row.paymentByCheck}`,
     },
+    {
+      field: "createdAt",
+      headerName: "Created At",
+      width: 150,
+      type: "date",
+      valueGetter: (value, row) => new Date(row.createdAt),
+      valueFormatter: (value) => {
+        const date = value as Date;
+        return date
+          ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
+          : ""; // Format the date and time
+      },
+    },
   ];
 
   useEffect(() => {
@@ -297,6 +311,9 @@ const Orders = () => {
         initialState={{
           pagination: {
             paginationModel: { pageSize: 15 }, // Set default page size to 10
+          },
+          sorting: {
+            sortModel: [{ field: "orderDate", sort: "desc" }],
           },
         }}
         disableColumnSelector
