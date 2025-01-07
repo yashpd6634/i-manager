@@ -355,6 +355,33 @@ export const appRouter = t.router({
         }
       }
     ),
+  updateMerchant: t.procedure
+    .input(
+      z.object({
+        merchantId: z.string(),
+        name: z.string(),
+        phoneNumber: z.string(),
+        location: z.string(),
+      })
+    )
+    .mutation(
+      async ({ input: { merchantId, name, phoneNumber, location } }) => {
+        try {
+          const merchant = await prisma.merchant.update({
+            where: { merchantId },
+            data: {
+              name,
+              phoneNumber,
+              location,
+            },
+          });
+
+          return merchant;
+        } catch (error) {
+          console.log("Error creating products", error);
+        }
+      }
+    ),
   getExpenses: t.procedure.query(async () => {
     try {
       const expenses = await prisma.expense.findMany({

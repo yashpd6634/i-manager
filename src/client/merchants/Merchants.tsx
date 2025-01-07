@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { MoneyTransfer } from "./MoneyTransfer";
 import MoneyTransactions from "./MoneyTransactionsTable";
+import UpdateMerchantModal from "./UpdateMerchantModal";
 
 type MerchantFormData = {
   merchantId: string;
@@ -43,7 +44,7 @@ const Merchants = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 200,
+      width: 190,
       renderCell: (params: any) => {
         const merchantId = params.row.merchantId; // Assuming each row has merchantId
         return (
@@ -58,11 +59,11 @@ const Merchants = () => {
       },
     },
     { field: "phoneNumber", headerName: "Phone Number", width: 100 },
-    { field: "location", headerName: "Location", width: 200 },
+    { field: "location", headerName: "Location", width: 190 },
     {
       field: "balance",
       headerName: "Balance",
-      width: 200,
+      width: 180,
       type: "number",
       valueFormatter: (value) => `₹${value}`,
       cellClassName: (params) =>
@@ -111,6 +112,20 @@ const Merchants = () => {
         return date
           ? `${dayjs(date).format("DD/MM/YYYY")} ${date.toLocaleTimeString()}`
           : ""; // Format the date and time
+      },
+    },
+    {
+      field: "updateMerchant",
+      headerName: "Update Merchant",
+      width: 120,
+      renderCell: (params) => {
+        const { merchantId } = params.row;
+
+        return (
+          <UpdateMerchantModal
+            merchantId={merchantId}
+          />
+        );
       },
     },
   ];

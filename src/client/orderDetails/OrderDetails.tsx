@@ -29,6 +29,13 @@ const columns: GridColDef[] = [
     type: "number",
     valueGetter: (value, row) => `${row.quantity}`,
   },
+  {
+    field: "totalPriceOfProduct",
+    headerName: "Total Price of Product",
+    width: 150,
+    type: "number",
+    valueGetter: (value, row) => `${row.quantity * row.soldPrice}`,
+  },
 ];
 
 const OrderDetails = () => {
