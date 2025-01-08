@@ -419,7 +419,8 @@ const TakeOrderModal = ({
                     <TableCell sx={{ width: 5 }}>{product.name}</TableCell>
                     <TableCell sx={{ maxWidth: 150 }}>
                       <TextField
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
                         value={product.quantity}
                         onChange={(e) =>
                           handleProductChange(index, "quantity", e.target.value)
@@ -441,7 +442,8 @@ const TakeOrderModal = ({
                     </TableCell>
                     <TableCell sx={{ maxWidth: 150 }}>
                       <TextField
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
                         value={product.soldPrice}
                         onChange={(e) =>
                           handleProductChange(
