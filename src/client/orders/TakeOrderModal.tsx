@@ -226,26 +226,41 @@ const TakeOrderModal = ({
     const newProducts = [...formData.products];
     const value = parseFloat(val);
 
-    newProducts[index] = {
-      ...newProducts[index],
-      [field]: value,
-    };
+    // Ensure the value is a valid number and not less than 0
+    if (!isNaN(value) && value >= 0) {
+      newProducts[index] = {
+        ...newProducts[index],
+        [field]: value,
+      };
 
-    // Check if quantity exceeds available quantity and set warnings
-    if (field === "quantity" && value > newProducts[index].availableQuantity) {
-      setWarnings((prev) => ({
-        ...prev,
-        [newProducts[index].productId]: "Quantity exceeds available stock!",
-      }));
-    } else if (field === "quantity") {
-      setWarnings((prev) => {
-        const { [newProducts[index].productId]: _, ...rest } = prev;
-        return rest;
-      });
+      // Check if quantity exceeds available quantity and set warnings
+      if (
+        field === "quantity" &&
+        value > newProducts[index].availableQuantity
+      ) {
+        setWarnings((prev) => ({
+          ...prev,
+          [newProducts[index].productId]: "Quantity exceeds available stock!",
+        }));
+      } else if (field === "quantity") {
+        setWarnings((prev) => {
+          const { [newProducts[index].productId]: _, ...rest } = prev;
+          return rest;
+        });
+      }
+
+      setFormData({ ...formData, products: newProducts });
+      updateTotalBill(newProducts);
+    } else if (val === "") {
+      // If the input is empty, set the quantity to 0
+      newProducts[index] = {
+        ...newProducts[index],
+        [field]: 0,
+      };
+
+      setFormData({ ...formData, products: newProducts });
+      updateTotalBill(newProducts);
     }
-
-    setFormData({ ...formData, products: newProducts });
-    updateTotalBill(newProducts);
   };
 
   const updateTotalBill = (

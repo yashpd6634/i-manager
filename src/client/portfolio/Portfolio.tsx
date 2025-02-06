@@ -3,6 +3,7 @@ import { trpc } from "@/util";
 import {
   Box,
   Button,
+  debounce,
   Dialog,
   DialogActions,
   DialogContent,
@@ -71,19 +72,36 @@ const Portfolio = () => {
   const [dateRange, setDateRange] = useState([
     { startDate: undefined, endDate: undefined, key: "selection" },
   ]);
+  const [purchasedDateRange, setPurchasedDateRange] = useState([
+    { startDate: undefined, endDate: undefined, key: "selection" },
+  ]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openPurchasedFilterDialog, setOpenPurchasedFilterDialog] =
+    useState(false);
   const [totalMerchantBill, setTotalMerchantBill] = useState(0);
   const [totalMerchantProfit, setTotalMerchantProfit] = useState(0);
 
   const [totalProductBill, setTotalProductBill] = useState(0);
   const [totalProductProfit, setTotalProductProfit] = useState(0);
+  const [totalPurchasePrice, setTotalPurchasePrice] = useState(0);
+  const [totalAllPurchasePrice, setTotalAllPurchasePrice] = useState(0);
 
   const handleDateRangeChange = (ranges: any) => {
     setDateRange([ranges.selection]);
   };
 
+  const handlePurchasedDateRangeChange = (ranges: any) => {
+    setPurchasedDateRange([ranges.selection]);
+  };
+
   const handleResetFilter = () => {
     setDateRange([
+      { startDate: undefined, endDate: undefined, key: "selection" },
+    ]);
+  };
+
+  const handlePurchasedDataResetFilter = () => {
+    setPurchasedDateRange([
       { startDate: undefined, endDate: undefined, key: "selection" },
     ]);
   };
@@ -93,7 +111,18 @@ const Portfolio = () => {
 
     const today = new Date();
 
-    return productData.products.map((product) => {
+    const filteredProducts = productData.products.filter((product) => {
+      const purchasedDate = dayjs(product.createdAt);
+      const startDate = purchasedDateRange[0].startDate;
+      const endDate = purchasedDateRange[0].endDate;
+
+      return (
+        (!startDate || purchasedDate.isSameOrAfter(startDate, "day")) &&
+        (!endDate || purchasedDate.isSameOrBefore(endDate, "day"))
+      );
+    });
+
+    return filteredProducts.map((product) => {
       // Check if the product is expired
       const isExpired = new Date(product.expiryDate) < today;
 
@@ -101,6 +130,9 @@ const Portfolio = () => {
       const loss = isExpired
         ? (product.purchasedPrice ?? 0) * product.currentQuantity
         : 0;
+
+      const totalPurchasedPrice =
+        (product.purchasedPrice ?? 0) * product.purchasedQuantity;
 
       // Filter the ordered products for the current product
       const relatedOrders = orderData.orders.flatMap((order) =>
@@ -181,10 +213,11 @@ const Portfolio = () => {
         orderedProductBill: totalorderedProductBill,
         orderedProductPrice: totalOrderedProductPrice,
         totalProfitOnProduct: totalProfit,
+        totalPurchasedPrice: totalPurchasedPrice,
         expiredQuantity: expiredQuantity ?? 0,
       };
     });
-  }, [productData, orderData, dateRange]);
+  }, [productData, orderData, dateRange, purchasedDateRange]);
 
   const productTableData = computedProducts.map(({ ordered, ...rest }) => rest);
   console.log(productTableData);
@@ -234,6 +267,8 @@ const Portfolio = () => {
     const visibleRowIds = gridFilteredSortedRowIdsSelector(apiRef);
     let totalBill = 0;
     let totalProfit = 0;
+    let totalPurchasePrice = 0;
+    let totalAllPurchasePrice = 0;
 
     if (table === "merchant") {
       visibleRowIds.forEach((rowId: any) => {
@@ -252,13 +287,24 @@ const Portfolio = () => {
         if (row) {
           totalBill += row.orderedProductBill;
           totalProfit += row.totalProfitOnProduct;
+          totalPurchasePrice += row.orderedProductPrice;
+          totalAllPurchasePrice += row.totalPurchasedPrice;
         }
       });
 
       setTotalProductBill(totalBill);
       setTotalProductProfit(totalProfit);
+      setTotalPurchasePrice(totalPurchasePrice);
+      setTotalAllPurchasePrice(totalAllPurchasePrice);
     }
   };
+
+  const debouncedCalculateBill = debounce(
+    (apiRef: React.MutableRefObject<GridApiCommunity>, table: string) => {
+      calculateBill(apiRef, table);
+    },
+    4000 // Adjust the delay as needed
+  );
 
   const productColumns: GridColDef[] = [
     { field: "productId", headerName: "Product ID", width: 100 },
@@ -391,11 +437,17 @@ const Portfolio = () => {
           }`}
         >
           Gross {`${totalProductProfit > 0 ? `Profit` : `Loss`}`}: ₹
-          {totalProductProfit}
+          {totalProductProfit} |
+        </h4>
+        <h4 className="text-fuchsia-600">
+          Total Purchased(Sold): ₹{totalPurchasePrice} |
+        </h4>
+        <h4 className="text-fuchsia-900">
+          Total Purchased(Bought): ₹{totalAllPurchasePrice}
         </h4>
       </div>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Date Filter</DialogTitle>
+        <DialogTitle>Order Date Filter</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
             <DateRangePicker
@@ -406,6 +458,28 @@ const Portfolio = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openPurchasedFilterDialog}
+        onClose={() => setOpenPurchasedFilterDialog(false)}
+      >
+        <DialogTitle>Purchased Date Filter</DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+            <DateRangePicker
+              ranges={purchasedDateRange}
+              onChange={handlePurchasedDateRangeChange}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setOpenPurchasedFilterDialog(false)}
+            color="primary"
+          >
             Close
           </Button>
         </DialogActions>
@@ -438,14 +512,28 @@ const Portfolio = () => {
                 variant="contained"
                 color="primary"
               >
-                Show Date Filter
+                Show Order Date Filter
               </Button>
               <Button
                 onClick={handleResetFilter}
                 color="secondary"
                 variant="outlined"
               >
-                Reset Date Filter
+                Reset Order Date Filter
+              </Button>
+              <Button
+                onClick={() => setOpenPurchasedFilterDialog(true)}
+                variant="contained"
+                color="primary"
+              >
+                Show Purchased Date Filter
+              </Button>
+              <Button
+                onClick={handlePurchasedDataResetFilter}
+                color="secondary"
+                variant="outlined"
+              >
+                Reset Purchased Date Filter
               </Button>
             </Box>
           ),
@@ -455,7 +543,7 @@ const Portfolio = () => {
             showQuickFilter: true,
           },
         }}
-        onStateChange={() => calculateBill(productApiRef, "product")}
+        onStateChange={() => debouncedCalculateBill(productApiRef, "product")}
         className="bg-white shadow rounded-lg border border-gray-200 mt-5 !text-gray-700"
       />
       <Header name="Portfolio based on Merchants" />
@@ -471,7 +559,7 @@ const Portfolio = () => {
         </h4>
       </div>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Date Filter</DialogTitle>
+        <DialogTitle>Order Date Filter</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
             <DateRangePicker
