@@ -1,95 +1,327 @@
-# Purpose
-This repo demonstrates:
-- Using tRPC over IPC to communicate between the main and renderer processes.
-- Using Prisma with an SQLite database.
-- End-to-end process of building, signing, notarizing, and publishing an Electron app with electron-builder on Mac and Windows.
+# I-Manager 📊
 
-electron-prisma-trpc-example intends to provide a clean proof-of-concept that you can pick-and-choose from and integrate into your own Electron app.
+[![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
+[![Electron](https://img.shields.io/badge/Electron-33.0.2-brightgreen.svg)](https://electronjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue.svg)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.21.1-indigo.svg)](https://www.prisma.io/)
+[![tRPC](https://img.shields.io/badge/tRPC-11.0.0--rc.421-yellow.svg)](https://trpc.io/)
 
-This is the next generation of https://github.com/awohletz/electron-prisma-template, simplified, trimmed down, and updated for the latest Electron and other dependencies.
+> **I-Manager** is a comprehensive cross-platform desktop application designed for modern business management, offering powerful inventory tracking, billing systems, and analytics features.
 
-## Getting started
-1. Clone this repo. Then in the project root directory, do the following:
-2. Run `npm install`.
-4. Edit electron-builder.yml to fill in productName, appId, copyright, and publisherName.
-5. Set up code signing. Follow the instructions in https://www.electron.build/code-signing to set up code signing certificates for your platform. Also see my articles: 
-    1. Windows: https://dev.to/awohletz/how-i-code-signed-an-electron-app-on-windows-30k5 
-    1. Mac: https://dev.to/awohletz/how-i-sign-and-notarize-my-electron-app-on-macos-59bb
-5. Edit package.json to fill in your project details. Set the `repository` property to a Github repo where you will publish releases. When you run `npm run dist`, the app will be packaged and published to the Github repo.
-   1. Create a Github repo for your app releases. See https://www.electron.build/configuration/publish#githuboptions
-   2. Create an access token for your Github repo. See https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
-6. Create a `.env` file that looks like this:
+## 🌟 Overview
+
+I-Manager is a sophisticated business management solution built with cutting-edge web technologies wrapped in an Electron shell. It provides businesses with a complete toolkit for managing inventory, processing orders, tracking expenses, and generating detailed analytics - all within a beautiful, intuitive interface.
+
+### 🎯 Key Features
+
+#### 📦 **Inventory Management**
+
+- **Real-time Stock Tracking**: Monitor current quantities, shop stock, and godown inventory
+- **Expiry Date Management**: Track product expiration dates with automated alerts
+- **Purchase Price Tracking**: Maintain wholesale and retail pricing with profit calculations
+- **Multi-location Stock**: Separate tracking for shop and warehouse inventory
+- **Stock Movement**: Transfer stock between godown and shop locations
+
+#### 💰 **Billing & Order Management**
+
+- **Comprehensive Order Processing**: Create, edit, and track customer orders
+- **Multi-payment Support**: Handle UPI, cash, and check payments
+- **PDF Bill Generation**: Professional invoice generation with company branding
+- **Order History**: Complete audit trail of all transactions
+- **Account Type Management**: Track different payment account types
+
+#### 👥 **Customer & Merchant Management**
+
+- **Merchant Profiles**: Detailed customer information with contact details
+- **Balance Tracking**: Monitor customer account balances and payment history
+- **Order History**: View complete transaction history per merchant
+- **Location-based Organization**: Track customers by geographical location
+
+#### 💳 **Financial Management**
+
+- **Money Transactions**: Track all financial movements
+- **Payment Processing**: Handle various payment methods
+- **Expense Tracking**: Categorized expense management
+- **Financial Reporting**: Comprehensive financial analytics
+
+#### 📊 **Analytics & Reporting**
+
+- **Dashboard Metrics**: Real-time business performance indicators
+- **Sales Analytics**: Track sales trends and popular products
+- **Profit Analysis**: Calculate profits per product and merchant
+- **Expense Summaries**: Categorized expense reporting
+- **Date Range Filtering**: Flexible reporting periods
+
+#### 👨‍💼 **Employee Management**
+
+- **Staff Profiles**: Maintain employee information and roles
+- **Order Assignment**: Track which employee processed each order
+- **Performance Tracking**: Monitor employee productivity
+
+## 🛠️ Technology Stack
+
+### **Frontend**
+
+- **React 18.3.1** - Modern UI library with hooks and functional components
+- **TypeScript 5.6.2** - Type-safe development with enhanced developer experience
+- **Material-UI (MUI) 6.1.6** - Professional component library with consistent design
+- **TailwindCSS 3.4.14** - Utility-first CSS framework for custom styling
+- **React Router 6.27.0** - Client-side routing and navigation
+- **Redux Toolkit 2.3.0** - State management with Redux Persist for data persistence
+- **React Query (TanStack) 5.59.19** - Server state management and caching
+- **Recharts 2.13.3** - Beautiful, responsive charts and data visualization
+- **Lucide React** - Beautiful SVG icons
+- **Day.js** - Lightweight date manipulation library
+
+### **Backend & Data**
+
+- **Electron 33.0.2** - Cross-platform desktop application framework
+- **tRPC 11.0.0-rc.421** - End-to-end typesafe APIs between main and renderer processes
+- **Prisma 5.21.1** - Modern database toolkit with type-safe client
+- **SQLite** - Embedded database for local data storage
+- **Zod 3.23.8** - TypeScript-first schema validation
+
+### **Build & Development Tools**
+
+- **Vite 5.4.10** - Fast build tool and development server
+- **Electron Builder 25.1.8** - Complete solution for packaging and building Electron apps
+- **ESLint** - Code linting with TypeScript support
+- **PostCSS** - CSS processing and optimization
+
+### **Additional Libraries**
+
+- **@react-pdf/renderer** - PDF generation for invoices and reports
+- **file-saver** - File download functionality
+- **react-date-range** - Date range picker components
+- **numeral** - Number formatting utilities
+- **uuid** - Unique identifier generation
+
+## 🏗️ Architecture
+
+### **IPC Communication**
+
+I-Manager uses tRPC over Electron's IPC (Inter-Process Communication) to provide type-safe communication between the main process and renderer process, ensuring data integrity and excellent developer experience.
+
+### **Database Design**
+
+The application uses Prisma ORM with SQLite for robust data management:
+
+- **Products**: Inventory items with pricing, quantities, and expiry tracking
+- **Orders**: Customer transactions with ordered products
+- **Merchants**: Customer profiles and account management
+- **Employees**: Staff management and order assignment
+- **Expenses**: Business expense tracking and categorization
+- **Money Transactions**: Financial transaction logging
+
+### **State Management**
+
+- **Redux Toolkit** for global application state
+- **Redux Persist** for data persistence across sessions
+- **React Query** for server state management and caching
+- **Local component state** for UI-specific interactions
+
+## 🚀 Getting Started
+
+### **Prerequisites**
+
+- **Node.js** (v16 or higher)
+- **npm** or **yarn**
+
+### **Installation**
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/yashpd6634/i-manager.git
+cd i-manager
 ```
-DATABASE_URL=file:./app.db
-# If you are signing and notarizing the app on Mac
-APPLE_ID=your apple id
-APPLE_ID_PASSWORD=your apple password
-APPLE_TEAM_ID=your apple team ID
-# If you want to publish releases to Github
-GITHUB_TOKEN=your github access token
-# If you want to code sign on Windows
-CSC_LINK=yourWindowsCodeSigningCert.pfx
-CSC_KEY_PASSWORD=your password for the Windows code signing cert
+
+2. **Install dependencies**
+
+```bash
+npm install
 ```
-5. Now you can run `npm start` to start in dev mode and check out the example app. If you want to test building and publishing a release, see the below sections.
 
-## Scripts
-### `npm run build` 
-Builds the project code and places it in `dist`. There are two steps to building: 
-  1. Use Vite to transpile the frontend TypeScript code in `src/client` and move it to `dist`. 
-  2. Generate the Prisma client in `src/generated`
-  2. Use the TypeScript compiler (`tsc`) to 1. check types in `src/client` (Vite does not check types) and 2. build the backend TypeScript code in `src/server` and place the output in `dist/server`.
-  3. Run copy-files.js -- Copy the generated Prisma client from `src/generated` to `dist/generated`
-  4. Run install-engines-on-mac.js -- Make sure that node_modules/@prisma/engines has both darwin and darwin-arm64 binaries. These will get packed into the app if you run `npm run pack`.
+3. **Set up environment variables**
+   Create a `.env` file in the root directory:
 
-### `npm start` 
-Build and start the app without packaging.
+```env
+DATABASE_URL=file:./prisma/app.db
 
-### `npm run pack`
-Build, pack, sign, and notarize the app for the current platform. The packed app will be output to `packed` directory. This is a fast way to test packing, signing, and notarizing. It does not publish the app to Github.
+# Optional: For code signing and publishing
+APPLE_ID=your_apple_id
+APPLE_ID_PASSWORD=your_apple_password
+APPLE_TEAM_ID=your_apple_team_id
+GITHUB_TOKEN=your_github_token
+```
 
-Once packed, you can test the outputted app in the `packed` directory. E.g. on Mac M1, open `packed/mac-arm64` in Finder and double-click on ElectronPrismaTrpcExample to run the app.
+4. **Initialize the database**
 
-### `npm run dist`
-Build, pack, sign, and notarize the app for production. The only difference between `npm run dist` and `npm run publish` is that `npm run dist` does not publish the app to Github.
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
 
-### `npm run publish`
-Build, pack, sign, notarize, and publish the app. Run this to publish a release to Github. The app will be published to the Github repo specified in `package.json`.
+5. **Seed the database (optional)**
 
+```bash
+npm run seed
+```
 
-## tRPC usage
-The tRPC integration allows Renderer to communicate to Main and get responses back. From tRPC's perspective, the Renderer is a client and the Main process is a server. It does not know that it is communicating over IPC.
+### **Development**
 
-In `src/client/renderer.ts` I've provided a custom `fetch` implementation to tRPC client to send the requests over IPC. 
+**Start the development server**
 
-In `src/server/main.ts`, `ipcMain` listens for those IPC requests and fowards them to the tRPC server. To enable this, I built a `ipcRequestHandler` function, which is a customized version of [tRPC's fetchRequestHandler](https://trpc.io/docs/v10/fetch). Instead of sending fetch API Request and Response objects, which cannot be serialized over IPC, it sends plain JSON objects and converts them to Response objects in the Renderer code.
+```bash
+npm run start
+```
 
-## Prisma usage
-electron-prisma-trpc-example uses Prisma to manage the SQLite database. To enable this, I had to leave the Prisma binaries out of app.asar. They do not work when packed inside app.asar. To leave them out, I specified them as excluded files in electron-builder.yml and as extraResources. Then I pass the query engine and migration engine paths from extraResources into the Prisma client constructor and the Prisma migrate command.  
+This will:
 
-To create a universal build on Mac M1 and Mac Intel, the build and install scripts pack both sets of Prisma binaries. 
+- Build the application
+- Generate Prisma client
+- Compile TypeScript
+- Start Vite development server
+- Launch Electron in development mode
 
-## Signing, notarizing, and publishing
-The `electron-builder.yml` file has configuration to sign and notarize the app for Mac, Windows, and Linux. You'll have to customize this file to enter your own publisher and app info.
+### **Building for Production**
 
-See https://github.com/awohletz/electron-prisma-trpc-example-releases for an example repo that holds the releases for this app. I publish releases to that repo using the `npm run publish` script.
+**Build the application**
 
-Here are the steps to publish a release on Windows and Mac:
-1. Make sure you've set up code signing and have the appropriate env vars in `.env`, as mentioned above in Getting Started. 
-2. On your Windows computer, run `npm run publish`
-2. On your Mac computer, run `npm run publish`
+```bash
+npm run build
+```
 
-These commands will build for their respective platforms and upload the release files to your Github repo.
+**Package for distribution**
 
-## Debugging
-The key parts of the Prisma integration:
-- The Prisma binaries/libraries do not work if packed inside of app.asar. Thus they have to be outside of the asar in extraResources. `npm run pack` should move them to ElectronPrismaTrpcExample/Contents/Resources/node_modules/@prisma/engines.
-- The Prisma client has to be configured to look for the query engine at that extraResources location (ElectronPrismaTrpcExample/Contents/Resources/node_modules/@prisma/engines). This is done either by [environment variable](https://www.prisma.io/docs/concepts/components/prisma-engines#using-custom-engine-libraries-or-binaries) or by [passing in the path with an internal config prop on the Prisma client constructor](https://github.com/prisma/prisma/discussions/5200#discussioncomment-295575). electron-prisma-trpc-example uses both of these techniques: Env var for the Prisma migrate command (which runs in a separate process) and engine prop for the Prisma client used to do queries in the app. 
+```bash
+npm run pack
+```
 
-If you encounter a problem with Prisma related to it not finding the binaries, you can debug where it locates the binaries like so on a Mac:
-1. Open a terminal
-2. Run `export DEBUG=prisma*` (see [docs](https://www.prisma.io/docs/concepts/components/prisma-client/debugging#setting-the-debug-environment-variable))
-3. `cd` to the directory where the app package is. E.g. your Applications directory.
-4. Run the app directly inside the .app package by entering on your terminal: `./ElectronPrismaTrpcExample.app/Contents/MacOS/ElectronPrismaTrpcExample`
-5. Now you should see a bunch of debug output written to your terminal as the app starts. Prisma will show where it is searching for the binaries. 
+**Create distributable packages**
 
+```bash
+npm run dist
+```
+
+**Publish to GitHub releases**
+
+```bash
+npm run publish
+```
+
+## 📱 Application Features
+
+### **Dashboard**
+
+- **Business Metrics**: Overview of key performance indicators
+- **Popular Products**: Top-selling items with sales data
+- **Merchant Summary**: Customer transaction summaries
+- **Expense Overview**: Recent expenses and category breakdowns
+- **Sales Trends**: Visual charts showing business performance
+
+### **Inventory Management**
+
+- **Product Catalog**: Complete product listing with search and filters
+- **Stock Levels**: Real-time inventory tracking
+- **Expiry Monitoring**: Automated alerts for products nearing expiration
+- **Price Management**: Wholesale and retail price management
+- **Stock Transfers**: Move inventory between godown and shop
+
+### **Order Processing**
+
+- **Quick Order Creation**: Streamlined order entry process
+- **Product Selection**: Searchable product dropdown with real-time availability
+- **Payment Options**: Multiple payment methods (UPI, Cash, Check)
+- **Bill Generation**: Professional PDF invoice creation
+- **Order History**: Complete transaction audit trail
+
+### **Merchant Management**
+
+- **Customer Profiles**: Detailed merchant information and contact details
+- **Balance Tracking**: Real-time account balance monitoring
+- **Transaction History**: Complete payment and order history
+- **Location Management**: Geographic organization of customers
+
+### **Financial Tracking**
+
+- **Money Transactions**: Comprehensive financial transaction logging
+- **Payment Processing**: Multi-method payment handling
+- **Expense Categories**: Organized expense tracking and reporting
+- **Profit Analysis**: Detailed profit calculations per product and merchant
+
+### **Reporting & Analytics**
+
+- **Interactive Dashboards**: Real-time business metrics visualization
+- **Date Range Filtering**: Flexible reporting periods
+- **Export Capabilities**: CSV export for external analysis
+- **Profit/Loss Statements**: Detailed financial reporting
+
+## 🔧 Configuration
+
+### **Database Configuration**
+
+The application uses SQLite with Prisma ORM. Database configuration is handled through the `prisma/schema.prisma` file and environment variables.
+
+### **Electron Configuration**
+
+Electron configuration is managed through:
+
+- `electron-builder.yml` - Build and packaging configuration
+- `src/server/main.ts` - Main process configuration
+- `src/server/preload.ts` - Preload script for secure IPC
+
+### **Build Configuration**
+
+- `vite.config.ts` - Frontend build configuration
+- `tsconfig.json` - TypeScript configuration
+- `tailwind.config.js` - TailwindCSS configuration
+
+## 🔒 Security Features
+
+- **Type-safe IPC**: tRPC ensures type safety across process boundaries
+- **Preload Scripts**: Secure context isolation between main and renderer processes
+- **Input Validation**: Zod schema validation for all data inputs
+- **SQL Injection Protection**: Prisma ORM provides automatic protection
+
+## 🚀 Deployment
+
+### **Code Signing**
+
+For production deployment, configure code signing:
+
+1. **Windows**: Follow the Windows code signing guide
+2. **macOS**: Set up Apple Developer certificates and notarization
+
+### **Auto-Updates**
+
+The application supports auto-updates through electron-updater (configuration available in electron-builder.yml).
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**PM Trade World**
+
+- GitHub: [@yashpd6634](https://github.com/yashpd6634)
+- Repository: [i-manager](https://github.com/yashpd6634/i-manager)
+
+## 🙏 Acknowledgments
+
+- Built with modern web technologies and best practices
+- Inspired by the need for comprehensive business management solutions
+- Community feedback and contributions are greatly appreciated
+
+---
+
+**I-Manager** - Empowering businesses with intelligent inventory and financial management solutions. 🚀
