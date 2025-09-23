@@ -58,6 +58,39 @@ I-Manager is a sophisticated business management solution built with cutting-edg
 - **Order Assignment**: Track which employee processed each order
 - **Performance Tracking**: Monitor employee productivity
 
+## Screenshots
+
+### Dashobard
+<img width="1919" height="1014" alt="image" src="https://github.com/user-attachments/assets/7156d703-f3c6-4d57-828b-6a3229c921ed" />
+
+### Inventory
+<img width="1919" height="1017" alt="image" src="https://github.com/user-attachments/assets/bb2a7307-b527-472a-811a-40bdf658d34e" />
+<img width="776" height="638" alt="image" src="https://github.com/user-attachments/assets/32d9fd77-26d3-4b0f-a709-3fe3b651526e" />
+
+### Products
+<img width="707" height="350" alt="image" src="https://github.com/user-attachments/assets/d791b015-5b63-4221-bb95-14f6f68f69d6" />
+<img width="1919" height="1015" alt="image" src="https://github.com/user-attachments/assets/3f3b10e2-1c59-4f31-8cab-5bb033a5b4d2" />
+<img width="764" height="778" alt="image" src="https://github.com/user-attachments/assets/f71cc569-7618-483b-a4a9-7bdbf3380f62" />
+
+### Orders
+<img width="1817" height="949" alt="image" src="https://github.com/user-attachments/assets/c9d05b41-2f3b-46ec-9864-47174e7c8482" />
+<img width="1605" height="949" alt="image" src="https://github.com/user-attachments/assets/8217af0f-1d30-4885-baa4-ba95b2049ced" />
+<img width="1605" height="949" alt="image" src="https://github.com/user-attachments/assets/a1cf35b7-dbaf-44e4-a00d-9dc92ce3a1db" />
+
+### Billing
+<img width="1913" height="657" alt="image" src="https://github.com/user-attachments/assets/dce7672b-4652-4671-a14e-df5372443901" />
+
+### Merchants
+<img width="1917" height="1021" alt="image" src="https://github.com/user-attachments/assets/577a430f-6b28-4f43-9be5-eb260096da82" />
+
+### Transactions without order
+<img width="1830" height="952" alt="image" src="https://github.com/user-attachments/assets/8db696d4-5c10-4aaf-a454-324999338d30" />
+
+### Portfolio
+
+<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/cdd91502-1c38-44ad-a7fc-dabe3ecc7312" />
+<img width="1796" height="886" alt="image" src="https://github.com/user-attachments/assets/7cbcc3cb-d884-45b1-94ed-2fb372b3172b" />
+
 ## 🛠️ Technology Stack
 
 ### **Frontend**
